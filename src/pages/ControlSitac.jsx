@@ -42,7 +42,7 @@ const RecenterMap = ({ lat, lng }) => {
   return null;
 };
 
-const ControlPihakKetiga = () => {
+const ControlSitac = () => {
   const [view, setView] = useState('table'); 
   const [expandedView, setExpandedView] = useState(null); 
   const [showNotification, setShowNotification] = useState(false);
@@ -432,4 +432,4 @@ const isSuperAdmin = role === 'superadmin';
   );
 };
 
-export default ControlPihakKetiga;
+export default ControlSitac;

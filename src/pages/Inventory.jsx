@@ -18,7 +18,7 @@ const Inventory = () => {
 
 // Variabel Sakti
 const isReadOnly = role === 'manager';
-
+const isSuperAdmin = role === 'superadmin';
   // Tambahkan fungsi ini di dalam komponen Inventory, sebelum baris return
   const handleExportExcel = () => {
     // 1. Ambil parameter pencarian dan filter yang sedang aktif

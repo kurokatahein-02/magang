@@ -1,11 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Layout from './components/Layout'; // Import Layout
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import ControlKegiatan from './pages/ControlKegiatan';
-import ControlPihakKetiga from './pages/ControlPihakKetiga';
-import ControlSitac from './pages/ControlSitac';
-import Inventory from './pages/Inventory';
+import Layout from './components/Layout'; // Import Layout Pintar
+import Login from './pages/Login'; // Import Login
 
 function App() {
   return (
@@ -13,49 +8,19 @@ function App() {
       <Routes>
         {/* Halaman Login (Tanpa Sidebar/Header) */}
         <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
 
-        {/* Halaman Dashboard (Dibungkus Layout agar ada Sidebar/Header) */}
-        <Route 
-          path="/dashboard" 
-          element={
-            <Layout>
-              <Dashboard />
-            </Layout>
-          } 
-        />
-        <Route 
-          path="/control-kegiatan" 
-          element={
-            <Layout>
-              <ControlKegiatan />
-            </Layout>
-          } 
-        />
-        <Route 
-          path="/control-pihak-ketiga" 
-          element={
-            <Layout>
-              <ControlPihakKetiga />
-            </Layout>
-          } 
-        />
-        <Route 
-          path="/control-sitac" 
-          element={
-            <Layout>
-              <ControlSitac />
-            </Layout>
-          } 
-        />
-        <Route 
-          path="/inventory" 
-          element={
-            <Layout>
-              <Inventory />
-            </Layout>
-          } 
-        />
-      </Routes>
+        {/* 
+          Semua route di bawah ini CUKUP memanggil <Layout /> saja.
+          Isi halamannya (apakah punya ISP atau punya Superadmin) 
+          akan diatur secara otomatis oleh file Layout.jsx 
+        */}
+        <Route path="/dashboard" element={<Layout />} />
+        <Route path="/control-kegiatan" element={<Layout />} />
+        <Route path="/control-pihak-ketiga" element={<Layout />} />
+        <Route path="/control-sitac" element={<Layout />} />
+        <Route path="/inventory" element={<Layout />} />
+      </Routes> 
     </Router>
   );
 }
