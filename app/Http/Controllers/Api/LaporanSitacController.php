@@ -24,7 +24,7 @@ class LaporanSitacController extends Controller
             'nama_vendor' => 'required|string',
             'lokasi' => 'required|string',
             'tanggal_mulai' => 'required|date',
-            'dokumen' => 'nullable|mimes:pdf|max:5120',
+            'dokumen' => 'required|mimes:pdf|max:5120',
         ]);
 
         $path = $request->hasFile('dokumen') 
@@ -87,5 +87,24 @@ class LaporanSitacController extends Controller
         $sitac->delete();
 
         return response()->json(['success' => true, 'message' => 'Data SITAC dihapus']);
+    }
+
+    // Tambahkan di LaporanSitacController.php
+
+    public function downloadFile($id)
+    {
+        $sitac = \App\Models\LaporanSitac::findOrFail($id);
+
+        if (!$sitac->dokumen) {
+            return response()->json(['success' => false, 'message' => 'Dokumen SITAC tidak ditemukan'], 404);
+        }
+
+        $path = storage_path('app/public/' . $sitac->dokumen);
+
+        if (!file_exists($path)) {
+            return response()->json(['success' => false, 'message' => 'File fisik tidak ada di server'], 404);
+        }
+
+        return response()->download($path);
     }
 }

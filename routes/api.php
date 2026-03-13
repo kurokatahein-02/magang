@@ -10,13 +10,11 @@ use App\Http\Controllers\Api\AuthController;
 
 
 Route::middleware(['auth:sanctum', 'RestrictManagerWrite'])->group(function () {
-    Route::post('/inventory', [InventoryController::class, 'store']);
-    Route::put('/inventory/{id}', [InventoryController::class, 'update']);
-    Route::delete('/inventory/{id}', [InventoryController::class, 'destroy']);
-    Route::get('/activities', [ActivityController::class, 'index']);
-    Route::post('/activities', [ActivityController::class, 'store']);
-    Route::put('/activities/{id}', [ActivityController::class, 'update']);
-    Route::delete('/activities/{id}', [ActivityController::class, 'destroy']);
+    Route::get('/inventories', [InventoryController::class, 'index']);
+    Route::post('/inventories', [InventoryController::class, 'store']);
+    Route::put('/inventories/{id}', [InventoryController::class, 'update']);
+    Route::delete('/inventories/{id}',[InventoryController::class, 'destroy']);
+    Route::get('/inventories/export',[InventoryController::class, 'export']);
     // Route khusus untuk toggle status
     Route::patch('/activities/{id}/status', [ActivityController::class, 'updateStatus']);
     // Endpoint untuk Control Pihak Ketiga
@@ -49,12 +47,14 @@ Route::post('/third-parties', [ThirdPartyController::class, 'store']);
 Route::put('/third-parties/{id}', [ThirdPartyController::class, 'update']);
 Route::patch('/third-parties/{id}/status', [ThirdPartyController::class, 'updateStatus']);
 Route::delete('/third-parties/{id}', [ThirdPartyController::class, 'destroy']);
+Route::get('third-parties/download/{id}', [ThirdPartyController::class, 'downloadFile']);
 // Route untuk Laporan SITAC
 Route::get('/laporan-sitacs', [LaporanSitacController::class, 'index']);
 Route::post('/laporan-sitacs', [LaporanSitacController::class, 'store']);
 Route::put('/laporan-sitacs/{id}', [LaporanSitacController::class, 'update']);
 Route::patch('/laporan-sitacs/{id}/status', [LaporanSitacController::class, 'updateStatus']);
 Route::delete('/laporan-sitacs/{id}', [LaporanSitacController::class, 'destroy']);
+Route::get('laporan-sitacs/download/{id}', [LaporanSitacController::class, 'downloadFile']);
 // Route untuk Inventory
 Route::get('/inventories', [InventoryController::class, 'index']);
 Route::post('/inventories', [InventoryController::class, 'store']);

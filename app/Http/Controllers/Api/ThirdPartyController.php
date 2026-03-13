@@ -31,7 +31,7 @@ class ThirdPartyController extends Controller
             'tanggal_berakhir'=> 'nullable|date',
             'latitude'        => 'nullable|numeric',
             'longitude'       => 'nullable|numeric',
-            'dokumen'         => 'nullable|mimes:pdf|max:5120', // Max 5MB
+            'dokumen'         => 'required|mimes:pdf|max:5120', // Max 5MB
         ]);
 
         $path = $request->hasFile('dokumen') 
@@ -112,6 +112,29 @@ class ThirdPartyController extends Controller
         $thirdParty->delete();
 
         return response()->json(['success' => true, 'message' => 'Data berhasil dihapus']);
+    }
+
+    // Tambahkan di bagian atas controller jika belum ada
+
+    public function downloadFile($id)
+    {
+        $thirdParty = ThirdParty::findOrFail($id);
+
+        // Cek apakah data dokumen ada di database
+        if (!$thirdParty->dokumen) {
+            return response()->json(['success' => false, 'message' => 'Dokumen tidak terdaftar'], 404);
+        }
+
+        // Ambil path lengkap file di storage
+        $path = storage_path('app/public/' . $thirdParty->dokumen);
+
+        // Cek apakah file fisik benar-benar ada di folder
+        if (!file_exists($path)) {
+            return response()->json(['success' => false, 'message' => 'File fisik tidak ditemukan di server'], 404);
+        }
+
+        // Mengembalikan file sebagai download (Ini akan memicu Header CORS Laravel)
+        return response()->download($path);
     }
 
     

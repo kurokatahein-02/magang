@@ -84,6 +84,8 @@ class DashboardController extends Controller
             'data'    => [
                 'stats' => [
                     'total'    => $grandTotal, 
+                    'open_count'  => $grandOpen,   // TAMBAHKAN INI (Angka riil)
+                    'close_count' => $grandClose, // TAMBAHKAN INI (Angka riil)
                     'open'     => $percentOpen . '%',
                     'close'    => $percentClose . '%',
                     'progress' => $overallProgress . '%',
