@@ -17,9 +17,9 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const DASHBOARD_API = 'http://127.0.0.1:8000/api/dashboard';
 const INVENTORY_API = 'http://127.0.0.1:8000/api/inventories';
 
-const DashboardISP = () => {
+const DashboardHAI = () => {
   const [data, setData] = useState(null);
-  const [ISPInventoryCount, setISPInventoryCount] = useState(0);
+  const [HAIInventoryCount, setHAIInventoryCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
 
@@ -29,11 +29,11 @@ const DashboardISP = () => {
       const responseDash = await axios.get(DASHBOARD_API);
       setData(responseDash.data.data);
 
-      // 2. Ambil data KHUSUS inventory ISP untuk dihitung jumlah barangnya
+      // 2. Ambil data KHUSUS inventory HAI untuk dihitung jumlah barangnya
       const responseInv = await axios.get(INVENTORY_API, {
-        params: { unit: 'ISP' } 
+        params: { unit: 'HAI' } 
       });
-      setISPInventoryCount(responseInv.data.data.length);
+      setHAIInventoryCount(responseInv.data.data.length);
 
       setLoading(false);
     } catch (error) {
@@ -47,25 +47,25 @@ const DashboardISP = () => {
     return () => clearInterval(interval);
   },[]);
 
-  if (loading) return <div className="h-full flex items-center justify-center font-bold animate-pulse text-[#56a8c7] tracking-widest uppercase">Memuat Dashboard ISP...</div>;
+  if (loading) return <div className="h-full flex items-center justify-center font-bold animate-pulse text-[#56a8c7] tracking-widest uppercase">Memuat Dashboard HAI...</div>;
 
-  // --- LOGIKA MENGAMBIL DATA KHUSUS ISP ---
-  const ISPStats = data?.unitStats?.ISP || { open_percent: 0, close_percent: 0, open_count: 0, close_count: 0 };
+  // --- LOGIKA MENGAMBIL DATA KHUSUS HAI ---
+  const HAIStats = data?.unitStats?.HAI || { open_percent: 0, close_percent: 0, open_count: 0, close_count: 0 };
   
-  // Total kegiatan ISP adalah jumlah dari Open + Close milik ISP
-  const totalKegiatanISP = (ISPStats.open_count || 0) + (ISPStats.close_count || 0);
+  // Total kegiatan HAI adalah jumlah dari Open + Close milik HAI
+  const totalKegiatanHAI = (HAIStats.open_count || 0) + (HAIStats.close_count || 0);
   // Progres diasumsikan sejajar dengan persentase kegiatan yang sudah 'Close'
-  const progressISP = ISPStats.close_percent || 0;
+  const progressHAI = HAIStats.close_percent || 0;
 
   return (
     <div className="h-full flex flex-col gap-6 select-none relative overflow-hidden pb-4">
 
-      {/* --- 1. BARIS ATAS: 4 KOTAK STATISTIK (KHUSUS ISP) --- */}
+      {/* --- 1. BARIS ATAS: 4 KOTAK STATISTIK (KHUSUS HAI) --- */}
       <div className="flex gap-6 shrink-0 h-24">
-        <StatCard title="Total Kegiatan" value={totalKegiatanISP} icon={LayoutDashboard} color="bg-white" iconColor="text-black" />
-        <StatCard title="Open" value={`${ISPStats.open_count}`} icon={DoorOpen} color="bg-green-500" iconColor="text-white" />
-        <StatCard title="Close" value={`${ISPStats.close_count}`} icon={DoorClosed} color="bg-red-500" iconColor="text-white" />
-        <StatCard title="Progres" value={`${progressISP}%`} icon={Timer} color="bg-orange-400" iconColor="text-white" />
+        <StatCard title="Total Kegiatan" value={totalKegiatanHAI} icon={LayoutDashboard} color="bg-white" iconColor="text-black" />
+        <StatCard title="Open" value={`${HAIStats.open_count}`} icon={DoorOpen} color="bg-green-500" iconColor="text-white" />
+        <StatCard title="Close" value={`${HAIStats.close_count}`} icon={DoorClosed} color="bg-red-500" iconColor="text-white" />
+        <StatCard title="Progres" value={`${progressHAI}%`} icon={Timer} color="bg-orange-400" iconColor="text-white" />
       </div>
 
       {/* --- 2. GRID UTAMA (KIRI & KANAN) --- */}
@@ -75,8 +75,8 @@ const DashboardISP = () => {
         <div className="col-span-5 flex flex-col gap-6 h-full">
           
           <DonutBox 
-            title="Progres Kegiatan ISP" 
-            stats={ISPStats} 
+            title="Progres Kegiatan HAI" 
+            stats={HAIStats} 
           />
 
           {/* KOTAK INVENTORY */}
@@ -90,7 +90,7 @@ const DashboardISP = () => {
             </div>
             
             <div className="flex-1 flex flex-col items-center justify-center">
-              <div className="text-5xl font-black mb-2 text-black">{ISPInventoryCount}</div>
+              <div className="text-5xl font-black mb-2 text-black">{HAIInventoryCount}</div>
               <div className="text-[10px] uppercase font-bold text-gray-400 tracking-widest">Total Jenis Barang</div>
             </div>
           </div>
@@ -179,4 +179,4 @@ const DonutBox = ({ title, stats }) => {
   );
 };
 
-export default DashboardISP;
+export default DashboardHAI;

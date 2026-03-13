@@ -160,8 +160,20 @@ const Dashboard = () => {
         <StatCard title="Total Data" value={data.stats.total} icon={LayoutDashboard} color="bg-gray-100" iconColor="text-black" />
         
         {/* Card Open dan Close akan otomatis menampilkan persentase gabungan dari Backend */}
-        <StatCard title="Open" value={data.stats.open} icon={DoorOpen} color="bg-green-100" iconColor="text-green-500" />
-        <StatCard title="Close" value={data.stats.close} icon={DoorClosed} color="bg-red-100" iconColor="text-red-500" />
+        <StatCard 
+          title="Open" 
+          value={data.stats.open_count} 
+          icon={DoorOpen} 
+          color="bg-green-100" 
+          iconColor="text-green-500" 
+        />
+        <StatCard 
+          title="Close" 
+          value={data.stats.close_count} 
+          icon={DoorClosed} 
+          color="bg-red-100" 
+          iconColor="text-red-500" 
+        />
         
         <StatCard title="Progres" value={data.stats.progress} icon={Timer} color="bg-orange-100" iconColor="text-orange-500" />
       </div>

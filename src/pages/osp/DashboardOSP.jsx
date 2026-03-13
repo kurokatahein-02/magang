@@ -51,16 +51,24 @@ const DashboardOSP = () => {
 
   const ospStats = data?.unitStats?.OSP || { open_percent: 0, close_percent: 0, open_count: 0, close_count: 0 };
 
+  // --- LOGIKA MENGAMBIL DATA KHUSUS OSP ---
+  const OSPStats = data?.unitStats?.OSP || { open_percent: 0, close_percent: 0, open_count: 0, close_count: 0 };
+  
+  // Total kegiatan OSP adalah jumlah dari Open + Close milik OSP
+  const totalKegiatanOSP = (OSPStats.open_count || 0) + (OSPStats.close_count || 0);
+  // Progres diasumsikan sejajar dengan persentase kegiatan yang sudah 'Close'
+  const progressOSP = OSPStats.close_percent || 0;
+
   return (
     <div className="h-full flex flex-col gap-6 select-none relative overflow-hidden pb-4">
       
       {/* --- 1. BARIS ATAS: 4 KOTAK STATISTIK --- */}
       <div className="flex gap-6 shrink-0 h-24">
-        <StatCard title="Total Kegiatan" value={data?.stats?.total || 0} icon={LayoutDashboard} color="bg-white" iconColor="text-black" />
-        <StatCard title="Open" value={`${data?.stats?.open || 0}%`} icon={DoorOpen} color="bg-green-500" iconColor="text-white" />
-        <StatCard title="Close" value={`${data?.stats?.close || 0}%`} icon={DoorClosed} color="bg-red-500" iconColor="text-white" />
-        <StatCard title="Progres" value={`${data?.stats?.progress || 0}%`} icon={Timer} color="bg-orange-400" iconColor="text-white" />
-      </div>
+              <StatCard title="Total Kegiatan" value={totalKegiatanOSP} icon={LayoutDashboard} color="bg-white" iconColor="text-black" />
+              <StatCard title="Open" value={`${OSPStats.open_count}`} icon={DoorOpen} color="bg-green-500" iconColor="text-white" />
+              <StatCard title="Close" value={`${OSPStats.close_count}`} icon={DoorClosed} color="bg-red-500" iconColor="text-white" />
+              <StatCard title="Progres" value={`${progressOSP}%`} icon={Timer} color="bg-orange-400" iconColor="text-white" />
+        </div>
 
       {/* --- 2. GRID UTAMA (KIRI & KANAN) --- */}
       <div className="flex-1 grid grid-cols-12 gap-6 min-h-0">

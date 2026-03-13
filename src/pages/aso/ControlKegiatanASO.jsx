@@ -5,32 +5,32 @@ import axios from 'axios';
 // Konfigurasi Base URL Laravel
 const API_URL = 'http://127.0.0.1:8000/api/activities';
 
-const ControlKegiatanOSP = () => {
+const ControlKegiatanASO = () => {
   // --- STATE MANAGEMENT ---
   const [view, setView] = useState('table'); 
   const [isExpanded, setIsExpanded] = useState(false);
   const [activities, setActivities] = useState([]);
   
-  // Perhatikan: unit otomatis diset ke 'OSP'
-  const [formData, setFormData] = useState({ id: null, name: '', unit: 'osp', startDate: '', status: 'Open' });
+  // Perhatikan: unit otomatis diset ke 'ASO'
+  const [formData, setFormData] = useState({ id: null, name: '', unit: 'aso', startDate: '', status: 'Open' });
   const[searchTerm, setSearchTerm] = useState('');
 
   const handleExportExcel = () => {
-    // Memaksa ekspor hanya untuk data OSP
+    // Memaksa ekspor hanya untuk data ASO
     const queryParams = new URLSearchParams({
-      unit: 'osp',
+      unit: 'aso',
       search: searchTerm
     }).toString();
 
     window.open(`${API_URL}/export?${queryParams}`, '_blank');
   };
 
-  // --- FETCH DATA DARI BACKEND KHUSUS OSP ---
+  // --- FETCH DATA DARI BACKEND KHUSUS ASO ---
   const fetchActivities = async () => {
     try {
       const response = await axios.get(API_URL, {
         params: {
-          unit: 'osp', // <--- MEMAKSA HANYA AMBIL DATA OSP
+          unit: 'aso', // <--- MEMAKSA HANYA AMBIL DATA ASO
           search: searchTerm
         }
       });
@@ -63,14 +63,14 @@ const ControlKegiatanOSP = () => {
 
   // --- LOGIKA ACTIONS ---
 
-  // Simpan Data Baru (Otomatis OSP)
+  // Simpan Data Baru (Otomatis ASO)
   const handleSaveNew = async () => {
     if(!formData.name || !formData.startDate) return alert("Isi data terlebih dahulu!");
     
     try {
       await axios.post(API_URL, {
         nama_kegiatan: formData.name,
-        unit: 'osp', // Pastikan tersimpan sebagai OSP
+        unit: 'aso', // Pastikan tersimpan sebagai ASO
         tanggal_mulai: formData.startDate,
         status: 'Open'
       });
@@ -86,7 +86,7 @@ const ControlKegiatanOSP = () => {
     try {
       const payload = {
         nama_kegiatan: formData.name,
-        unit: 'osp', // Pastikan tersimpan sebagai OSP
+        unit: 'aso', // Pastikan tersimpan sebagai ASO
         tanggal_mulai: formData.startDate,
         status: formData.status,
         tanggal_berakhir: formData.status === 'Close' ? getRealtimeDate() : null
@@ -125,7 +125,7 @@ const ControlKegiatanOSP = () => {
   };
 
   const resetForm = () => {
-    setFormData({ id: null, name: '', unit: 'osp', startDate: '', status: 'Open' });
+    setFormData({ id: null, name: '', unit: 'aso', startDate: '', status: 'Open' });
     setView('table');
   };
 
@@ -138,7 +138,7 @@ const ControlKegiatanOSP = () => {
   if (view === 'form' || view === 'edit') {
     return (
       <div className="h-full flex flex-col items-center justify-center select-none animate-fadeIn">
-        <h3 className="mb-8 font-bold text-sm uppercase tracking-widest text-center">MONITORING KEGIATAN (DIVISI OSP)</h3>
+        <h3 className="mb-8 font-bold text-sm uppercase tracking-widest text-center">MONITORING KEGIATAN (DIVISI ASO)</h3>
         
         <div className="bg-[#f3f4f6] border border-black rounded-[40px] p-12 w-full max-w-4xl shadow-sm flex flex-col gap-6">
           <div className="space-y-6">
@@ -150,7 +150,7 @@ const ControlKegiatanOSP = () => {
               className="w-full p-3 rounded-lg border border-black bg-[#d9d9d9] italic px-6 focus:outline-none"
             />
             
-            {/* Input Unit Dihilangkan Karena Sudah Pasti OSP */}
+            {/* Input Unit Dihilangkan Karena Sudah Pasti ASO */}
 
             <div className="flex gap-4">
               <div className="relative flex-1">
@@ -163,7 +163,7 @@ const ControlKegiatanOSP = () => {
                 <CalendarDays size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
               </div>
 
-              {/* Status hanya muncul saat mode edit, OSP diizinkan merubah ini */}
+              {/* Status hanya muncul saat mode edit, ASO diizinkan merubah ini */}
               {view === 'edit' && (
                 <div className="relative flex-1">
                   <select 
@@ -196,7 +196,7 @@ const ControlKegiatanOSP = () => {
       {!isExpanded && (
         <>
           <div className="flex justify-center mb-6">
-            <h3 className="font-bold text-xl uppercase tracking-widest">MONITORING KEGIATAN (DIVISI OSP)</h3>
+            <h3 className="font-bold text-xl uppercase tracking-widest">MONITORING KEGIATAN (DIVISI ASO)</h3>
           </div>
 
           <div className="flex gap-4 mb-4">
@@ -210,7 +210,7 @@ const ControlKegiatanOSP = () => {
           </div>
 
           <div className="flex justify-between items-end mb-4">
-            {/* Filter OSP/OSP/ALL dihilangkan sebagai spacer kosong */}
+            {/* Filter OSP/ASO/ALL dihilangkan sebagai spacer kosong */}
             <div></div>
 
             <div className="flex gap-3">
@@ -234,7 +234,7 @@ const ControlKegiatanOSP = () => {
       {isExpanded && (
         <div className="relative mb-6">
           <button onClick={() => setIsExpanded(false)} className="absolute left-0 top-1/2 -translate-y-1/2 bg-white border border-black rounded-full w-10 h-10 flex items-center justify-center shadow-md font-bold text-xl">←</button>
-          <h3 className="text-center font-bold text-xl uppercase tracking-widest">MONITORING KEGIATAN (DIVISI OSP)</h3>
+          <h3 className="text-center font-bold text-xl uppercase tracking-widest">MONITORING KEGIATAN (DIVISI ASO)</h3>
         </div>
       )}
 
@@ -244,7 +244,7 @@ const ControlKegiatanOSP = () => {
             <tr>
               <th className="w-12 p-3 border-r border-b border-black text-[11px] font-bold">NO</th>
               <th className="p-3 border-r border-b border-black text-[11px] font-bold">Nama Kegiatan</th>
-              {/* Kolom Nama Unit dihapus karena sudah pasti OSP */}
+              {/* Kolom Nama Unit dihapus karena sudah pasti ASO */}
               <th className="p-3 border-r border-b border-black text-[11px] font-bold">Tanggal Mulai</th>
               <th className="p-3 border-r border-b border-black text-[11px] font-bold">Tanggal Berakhir</th>
               <th className="w-24 p-3 border-r border-b border-black text-[11px] font-bold">Status</th>
@@ -259,7 +259,7 @@ const ControlKegiatanOSP = () => {
                 <td className="border-r border-black text-xs">{item.startDate}</td>
                 <td className="border-r border-black text-xs">{item.endDate}</td>
                 <td className="border-r border-black p-2">
-                  {/* Status Togle untuk OSP, bebas diklik dengan efek hover */}
+                  {/* Status Togle untuk ASO, bebas diklik dengan efek hover */}
                   <button 
                     onClick={(e) => { 
                       e.stopPropagation(); 
@@ -272,7 +272,7 @@ const ControlKegiatanOSP = () => {
                   </button>
                 </td>
                 <td className="px-4">
-                  {/* Edit & Delete bebas digunakan oleh OSP */}
+                  {/* Edit & Delete bebas digunakan oleh ASO */}
                   <div className="flex justify-center gap-4 h-full items-center">
                     <button onClick={(e) => { e.stopPropagation(); startEdit(item); }} className="bg-[#56a8c7] border border-black rounded-md px-4 py-0.5 text-[9px] font-bold hover:bg-white transition-all">Edit</button>
                     <button onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }} className="bg-[#56a8c7] border border-black rounded-md px-4 py-0.5 text-[9px] font-bold hover:bg-white transition-all">Delete</button>
@@ -298,4 +298,4 @@ const ControlKegiatanOSP = () => {
   );
 };
 
-export default ControlKegiatanOSP;
+export default ControlKegiatanASO;

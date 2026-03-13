@@ -91,12 +91,39 @@ const isSuperAdmin = role === 'superadmin';
     fetchVendors();
   }, []);
 
-  const handleDownload = (item, e) => {
+  const handleDownload = async (item, e) => {
     e?.stopPropagation(); 
-    if (!item?.docUrl) return alert("Dokumen tidak tersedia");
-    window.open(item.docUrl, '_blank');
-    setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 3000);
+    
+    try {
+      // 1. Panggil API download khusus
+      const response = await axios.get(`${API_URL}/download/${item.id}`, {
+        responseType: 'blob', // PENTING: Untuk membaca data biner PDF
+      });
+
+      // 2. Logika penamaan file kustom
+      const date = new Date().toISOString().split('T')[0]; // Format: 2026-03-13
+      const vendorName = item.name.replace(/[^a-z0-9]/gi, '_'); // Bersihkan nama dari karakter aneh
+      const finalFileName = `${vendorName}_Dokumen_${date}.pdf`;
+
+      // 3. Proses Download Otomatis di Browser
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', finalFileName);
+      document.body.appendChild(link);
+      link.click();
+
+      // 4. Bersihkan memori
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      setShowNotification(true);
+      setTimeout(() => setShowNotification(false), 3000);
+
+    } catch (error) {
+      console.error("Download error:", error);
+      alert("Gagal mengunduh dokumen. Pastikan Anda memiliki koneksi internet dan file tersedia di server.");
+    }
   };
 
   const toggleStatus = async (id, e) => {
@@ -142,37 +169,64 @@ const isSuperAdmin = role === 'superadmin';
   };
 
   const handleSave = async () => {
-    if (!formData.name || !formData.location || !formData.startDate) {
-      return alert("Mohon lengkapi data utama!");
+  // 1. Validasi Input Dasar
+  if (!formData.name || !formData.location || !formData.startDate) {
+    return alert("Mohon lengkapi Nama Vendor, Lokasi, dan Tanggal Mulai!");
+  }
+
+  // 2. Validasi File (Wajib jika Tambah Data Baru)
+  if (view !== 'edit' && !selectedFile) {
+    return alert("Wajib melampirkan dokumen PDF untuk data baru!");
+  }
+
+  // 3. Gunakan FormData karena ada pengiriman file (Multipart)
+  const data = new FormData();
+  data.append('nama_vendor', formData.name);
+  data.append('lokasi', formData.location);
+  data.append('tanggal_mulai', formData.startDate);
+  
+  // Tambahkan jika ada isinya
+  if (formData.endDate) data.append('tanggal_berakhir', formData.endDate);
+  if (formData.lat) data.append('latitude', formData.lat);
+  if (formData.lng) data.append('longitude', formData.lng);
+  if (formData.status) data.append('status', formData.status);
+  
+  // Masukkan file jika user memilih file baru
+  if (selectedFile) {
+    data.append('dokumen', selectedFile);
+  }
+
+  try {
+    if (view === 'edit') {
+      // --- LOGIKA UPDATE ---
+      // Laravel butuh _method PUT jika mengirim FormData lewat POST
+      data.append('_method', 'PUT'); 
+      
+      await axios.post(`${API_URL}/${formData.id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      console.log("Data SITAC berhasil diperbarui");
+    } else {
+      // --- LOGIKA SIMPAN BARU ---
+      await axios.post(API_URL, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      console.log("Data SITAC baru berhasil disimpan");
     }
 
-    const data = new FormData();
-    data.append('nama_vendor', formData.name);
-    data.append('lokasi', formData.location);
-    data.append('tanggal_mulai', formData.startDate);
-    if (formData.endDate) data.append('tanggal_berakhir', formData.endDate);
-    if (formData.lat) data.append('latitude', formData.lat);
-    if (formData.lng) data.append('longitude', formData.lng);
-    if (selectedFile) data.append('dokumen', selectedFile);
-    data.append('status', formData.status);
+    // 4. Refresh data tabel dan kembali ke tampilan awal
+    fetchVendors();
+    resetForm();
+    alert("Data berhasil disimpan!");
 
-    try {
-      if (view === 'edit') {
-        data.append('_method', 'PUT');
-        await axios.post(`${API_URL}/${formData.id}`, data, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-      } else {
-        await axios.post(API_URL, data, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-      }
-      fetchVendors();
-      resetForm();
-    } catch (error) {
-      alert("Gagal menyimpan data vendor.");
-    }
-  };
+  } catch (error) {
+    console.error("Gagal menyimpan data:", error);
+    
+    // Tampilkan pesan error spesifik dari Laravel jika ada
+    const errorMsg = error.response?.data?.message || "Terjadi kesalahan saat menyimpan data.";
+    alert(errorMsg);
+  }
+};
 
   const resetForm = () => {
     setView('table');

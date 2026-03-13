@@ -17,9 +17,9 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const DASHBOARD_API = 'http://127.0.0.1:8000/api/dashboard';
 const INVENTORY_API = 'http://127.0.0.1:8000/api/inventories';
 
-const DashboardISP = () => {
+const DashboardASO = () => {
   const [data, setData] = useState(null);
-  const [ISPInventoryCount, setISPInventoryCount] = useState(0);
+  const [ASOInventoryCount, setASOInventoryCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
 
@@ -29,11 +29,11 @@ const DashboardISP = () => {
       const responseDash = await axios.get(DASHBOARD_API);
       setData(responseDash.data.data);
 
-      // 2. Ambil data KHUSUS inventory ISP untuk dihitung jumlah barangnya
+      // 2. Ambil data KHUSUS inventory ASO untuk dihitung jumlah barangnya
       const responseInv = await axios.get(INVENTORY_API, {
-        params: { unit: 'ISP' } 
+        params: { unit: 'ASO' } 
       });
-      setISPInventoryCount(responseInv.data.data.length);
+      setASOInventoryCount(responseInv.data.data.length);
 
       setLoading(false);
     } catch (error) {
@@ -47,42 +47,42 @@ const DashboardISP = () => {
     return () => clearInterval(interval);
   },[]);
 
-  if (loading) return <div className="h-full flex items-center justify-center font-bold animate-pulse text-[#56a8c7] tracking-widest uppercase">Memuat Dashboard ISP...</div>;
+  if (loading) return <div className="h-full flex items-center justify-center font-bold animate-pulse text-[#56a8c7] tracking-widest uppercase">Memuat Dashboard ASO...</div>;
 
-  // --- LOGIKA MENGAMBIL DATA KHUSUS ISP ---
-  const ISPStats = data?.unitStats?.ISP || { open_percent: 0, close_percent: 0, open_count: 0, close_count: 0 };
+  // --- LOGIKA MENGAMBIL DATA KHUSUS ASO ---
+  const ASOStats = data?.unitStats?.ASO || { open_percent: 0, close_percent: 0, open_count: 0, close_count: 0 };
   
-  // Total kegiatan ISP adalah jumlah dari Open + Close milik ISP
-  const totalKegiatanISP = (ISPStats.open_count || 0) + (ISPStats.close_count || 0);
+  // Total kegiatan ASO adalah jumlah dari Open + Close milik ASO
+  const totalKegiatanASO = (ASOStats.open_count || 0) + (ASOStats.close_count || 0);
   // Progres diasumsikan sejajar dengan persentase kegiatan yang sudah 'Close'
-  const progressISP = ISPStats.close_percent || 0;
+  const progressASO = ASOStats.close_percent || 0;
 
   return (
     <div className="h-full flex flex-col gap-6 select-none relative overflow-hidden pb-4">
 
-      {/* --- 1. BARIS ATAS: 4 KOTAK STATISTIK (KHUSUS ISP) --- */}
+      {/* --- 1. BARIS ATAS: 4 KOTAK STATISTIK (KHUSUS ASO) --- */}
       <div className="flex gap-6 shrink-0 h-24">
-        <StatCard title="Total Kegiatan" value={totalKegiatanISP} icon={LayoutDashboard} color="bg-white" iconColor="text-black" />
-        <StatCard title="Open" value={`${ISPStats.open_count}`} icon={DoorOpen} color="bg-green-500" iconColor="text-white" />
-        <StatCard title="Close" value={`${ISPStats.close_count}`} icon={DoorClosed} color="bg-red-500" iconColor="text-white" />
-        <StatCard title="Progres" value={`${progressISP}%`} icon={Timer} color="bg-orange-400" iconColor="text-white" />
+        <StatCard title="Total Kegiatan" value={totalKegiatanASO} icon={LayoutDashboard} color="bg-white" iconColor="text-black" />
+        <StatCard title="Open" value={`${ASOStats.open_count}`} icon={DoorOpen} color="bg-green-500" iconColor="text-white" />
+        <StatCard title="Close" value={`${ASOStats.close_count}`} icon={DoorClosed} color="bg-red-500" iconColor="text-white" />
+        <StatCard title="Progres" value={`${progressASO}%`} icon={Timer} color="bg-orange-400" iconColor="text-white" />
       </div>
 
       {/* --- 2. GRID UTAMA (KIRI & KANAN) --- */}
       <div className="flex-1 grid grid-cols-12 gap-6 min-h-0">
         
-        {/* KIRI: DONUT CHART & INVENTORY (Span 5) */}
-        <div className="col-span-5 flex flex-col gap-6 h-full">
+        {/* KIRI: DONUT CHART & INVENTORY (Disesuaikan agar bersebelahan) */}
+        <div className="col-span-12 flex gap-6 h-full">
           
           <DonutBox 
-            title="Progres Kegiatan ISP" 
-            stats={ISPStats} 
+            title="Progres Kegiatan ASO" 
+            stats={ASOStats} 
           />
 
-          {/* KOTAK INVENTORY */}
+          {/* KOTAK INVENTORY (Sekarang di samping DonutBox) */}
           <div 
             onClick={() => window.location.href = '/inventory'} 
-            className="bg-white border border-black rounded-[20px] p-6 h-[35%] flex flex-col shadow-sm cursor-pointer hover:shadow-md transition-all group relative overflow-hidden"
+            className="bg-white border border-black rounded-[20px] p-6 flex-1 flex flex-col shadow-sm cursor-pointer hover:shadow-md transition-all group relative overflow-hidden"
           >
             <div className="flex items-center gap-2 mb-4 text-[#1a536e]">
               <Package size={20} />
@@ -90,35 +90,9 @@ const DashboardISP = () => {
             </div>
             
             <div className="flex-1 flex flex-col items-center justify-center">
-              <div className="text-5xl font-black mb-2 text-black">{ISPInventoryCount}</div>
+              <div className="text-5xl font-black mb-2 text-black">{ASOInventoryCount}</div>
               <div className="text-[10px] uppercase font-bold text-gray-400 tracking-widest">Total Jenis Barang</div>
             </div>
-          </div>
-        </div>
-
-        {/* KANAN: MAP LOKASI SITAC (Span 7) */}
-        <div className="col-span-7 bg-white border border-black rounded-[20px] p-6 flex flex-col shadow-sm h-full">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <MapPin size={24} className="text-black" fill="black" stroke="white" />
-            <div className="text-sm font-black uppercase tracking-[0.2em]">Lokasi SITAC</div>
-          </div>
-          
-          <div className="flex-1 rounded-2xl overflow-hidden border border-black/10">
-              <MapContainer center={[-7.566, 110.831]} zoom={12} style={{ height: '100%', width: '100%' }} key={expanded ? 'expanded-map' : 'mini-map'}>
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  
-                  {/* Map SITAC */}
-                  {(expanded === 'lokasi-sitac' ? data?.markers?.sitac : (data?.markers?.sitac ||[])).map(m => (
-                    m.latitude && (
-                      <Marker key={m.id} position={[m.latitude, m.longitude]}>
-                        <Popup>
-                          <span className="font-bold text-xs">{m.nama_vendor}</span><br/>
-                          <span className="text-[10px]">{m.lokasi}</span>
-                        </Popup>
-                      </Marker>
-                    )
-                  ))}
-              </MapContainer>
           </div>
         </div>
 
@@ -179,4 +153,4 @@ const DonutBox = ({ title, stats }) => {
   );
 };
 
-export default DashboardISP;
+export default DashboardASO;

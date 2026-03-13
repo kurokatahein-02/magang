@@ -42,7 +42,7 @@ const RecenterMap = ({ lat, lng }) => {
   return null;
 };
 
-const ControlSitacISP = () => {
+const ControlSitacHAI = () => {
   const [view, setView] = useState('table'); 
   const [expandedView, setExpandedView] = useState(null); 
   const [showNotification, setShowNotification] = useState(false);
@@ -294,7 +294,7 @@ const isSuperAdmin = role === 'superadmin';
   const selectLocation = (item) => {
     setFormData({
       ...formData,
-      location: item.display_name,
+      location: item.dHAIlay_name,
       lat: parseFloat(item.lat).toFixed(8),
       lng: parseFloat(item.lon).toFixed(8),
     });
@@ -328,7 +328,7 @@ const isSuperAdmin = role === 'superadmin';
                       onClick={() => selectLocation(item)}
                       className="p-3 text-[11px] hover:bg-[#56a8c7] hover:text-white cursor-pointer border-b border-gray-100 last:border-none transition-colors"
                     >
-                      {item.display_name}
+                      {item.dHAIlay_name}
                     </li>
                   ))}
                 </ul>
@@ -487,4 +487,4 @@ const isSuperAdmin = role === 'superadmin';
   );
 };
 
-export default ControlSitacISP;
+export default ControlSitacHAI;

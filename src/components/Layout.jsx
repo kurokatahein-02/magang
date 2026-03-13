@@ -12,7 +12,7 @@ import InventoryDefault from '../pages/Inventory';
 
 // 2. IMPORT COMPONENT KHUSUS DIVISI ISP
 import ControlKegiatanISP from '../pages/isp/ControlKegiatanISP';
-import InventoryISP from '../pages/isp/Inventory';
+import InventoryISP from '../pages/isp/InventoryISP';
 import ControlSitacISP from '../pages/isp/ControlSitacISP';
 import DashboardISP from '../pages/isp/DashboardISP';
 
@@ -21,6 +21,18 @@ import ControlKegiatanOSP from '../pages/osp/ControlKegiatanOSP';
 import ControlPihakKetigaOSP from '../pages/osp/ControlPihakKetigaOSP';
 import InventoryOSP from '../pages/osp/InventoryOSP';
 import DashboardOSP from '../pages/osp/DashboardOSP';
+
+// IMPORT COMPONENT KHUSUS DIVISI ASO
+import ControlKegiatanASO from '../pages/aso/ControlKegiatanASO';
+import InventoryASO from '../pages/aso/InventoryASO';
+import DashboardASO from '../pages/aso/DashboardASO';
+
+// IMPORT COMPONENT KHUSUS DIVISI HAI
+import ControlKegiatanHAI from '../pages/hai/ControlKegiatanHAI';
+import DashboardHAI from '../pages/hai/DashboardHAI';
+import InventoryHAI from '../pages/hai/InventoryHAI';
+import ControlSitacHAI from '../pages/hai/ControlSitacHAI';
+
 
 const Layout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); 
@@ -65,7 +77,7 @@ const Layout = ({ children }) => {
       { name: 'CONTROL LAPORAN SITAC', path: '/control-sitac' },
       { name: 'INVENTORY', path: '/inventory' },
     ];
-  } if (role === 'osp') {
+  } else if (role === 'osp') {
     // MENU KHUSUS OSP (Tanpa Pihak Ketiga & Sitac)
     menuItems =[  
       { name: 'DASHBOARD', path: '/dashboard' },
@@ -73,7 +85,24 @@ const Layout = ({ children }) => {
       { name: 'CONTROL PIHAK KETIGA', path: '/control-pihak-ketiga' },
       { name: 'INVENTORY', path: '/inventory' },
     ];
-    }else {
+  
+  }  else if (role === 'aso') {
+      // MENU KHUSUS ASO (Hanya Dashboard, Control Kegiatan, dan Inventory)
+      menuItems =[
+        { name: 'DASHBOARD', path: '/dashboard' },
+        { name: 'CONTROL KEGIATAN', path: '/control-kegiatan' },
+        { name: 'INVENTORY', path: '/inventory' },
+      ];
+  }  else if (role === 'hai') {
+      // MENU KHUSUS HAI (Hanya Dashboard, Control Kegiatan, Control Sitac, dan Inventory)
+      menuItems =[
+        { name: 'DASHBOARD', path: '/dashboard' },
+        { name: 'CONTROL KEGIATAN', path: '/control-kegiatan' },
+        { name: 'CONTROL SITAC', path: '/control-sitac' },
+        { name: 'INVENTORY', path: '/inventory' },
+      ];
+    }
+  else {
     // MENU DEFAULT UNTUK SUPERADMIN / MANAGER
     menuItems =[
       { name: 'DASHBOARD', path: '/dashboard' },
@@ -90,6 +119,8 @@ const Layout = ({ children }) => {
       case '/dashboard':
         if (role === 'isp') return <DashboardISP />;
         if (role === 'osp') return <DashboardOSP />;
+        if (role === 'aso') return <DashboardASO />;
+        if (role === 'hai') return <DashboardHAI />;
         // Nanti kalau ada OSP tinggal tambah: if (role === 'osp') return <ControlKegiatanOSP />;
         return <Dashboard />;
         
@@ -97,6 +128,8 @@ const Layout = ({ children }) => {
       case '/control-kegiatan':
         if (role === 'isp') return <ControlKegiatanISP />;
         if (role === 'osp') return <ControlKegiatanOSP />;
+        if (role === 'aso') return <ControlKegiatanASO />;
+        if (role === 'hai') return <ControlKegiatanHAI />;
         // Nanti kalau ada OSP tinggal tambah: if (role === 'osp') return <ControlKegiatanOSP />;
         return <ControlKegiatanDefault />;
         
@@ -107,11 +140,14 @@ const Layout = ({ children }) => {
         
       case '/control-sitac':
         if (role === 'isp') return <ControlSitacISP />;
+        if (role === 'hai') return <ControlSitacHAI />;
         return <ControlSitacDefault />;
         
       case '/inventory':
         if (role === 'isp') return <InventoryISP />;
         if (role === 'osp') return <InventoryOSP />;
+        if (role === 'aso') return <InventoryASO />;
+        if (role === 'hai') return <InventoryHAI />;
         return <InventoryDefault />;
         
       default:
