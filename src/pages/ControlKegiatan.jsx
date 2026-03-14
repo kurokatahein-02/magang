@@ -188,7 +188,6 @@ const isSuperAdmin = role === 'superadmin';
                 onChange={(e) => setFormData({...formData, startDate: e.target.value})}
                 className="w-full p-3 rounded-lg border border-black bg-[#d9d9d9] italic px-6 focus:outline-none"
               />
-              <CalendarDays size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
             </div>
 
             {view === 'edit' && (

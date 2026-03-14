@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import myLogo from '../assets/logo-tif.png'; 
+import { LayoutDashboard, LaptopMinimalCheck, Users, MapPinned, Box} from 'lucide-react'; // Contoh icon, bisa diganti sesuai kebutuhan
 
 // 1. IMPORT COMPONENT DEFAULT (Superadmin / Manager)
 import Dashboard from '../pages/Dashboard';
@@ -72,44 +73,44 @@ const Layout = ({ children }) => {
   if (role === 'isp') {
     // MENU KHUSUS ISP (Tanpa Pihak Ketiga)
     menuItems =[
-      { name: 'DASHBOARD', path: '/dashboard' },
-      { name: 'CONTROL KEGIATAN', path: '/control-kegiatan' },
-      { name: 'CONTROL LAPORAN SITAC', path: '/control-sitac' },
-      { name: 'INVENTORY', path: '/inventory' },
+      { name: 'DASHBOARD', path: '/dashboard', icon: LayoutDashboard},
+      { name: 'CONTROL KEGIATAN', path: '/control-kegiatan', icon: LaptopMinimalCheck },
+      { name: 'CONTROL LAPORAN SITAC', path: '/control-sitac', icon: MapPinned },
+      { name: 'INVENTORY', path: '/inventory', icon: Box },
     ];
   } else if (role === 'osp') {
     // MENU KHUSUS OSP (Tanpa Pihak Ketiga & Sitac)
     menuItems =[  
-      { name: 'DASHBOARD', path: '/dashboard' },
-      { name: 'CONTROL KEGIATAN', path: '/control-kegiatan' },
-      { name: 'CONTROL PIHAK KETIGA', path: '/control-pihak-ketiga' },
-      { name: 'INVENTORY', path: '/inventory' },
+      { name: 'DASHBOARD', path: '/dashboard', icon: LayoutDashboard},
+      { name: 'CONTROL KEGIATAN', path: '/control-kegiatan', icon: LaptopMinimalCheck },
+      { name: 'CONTROL PIHAK KETIGA', path: '/control-pihak-ketiga', icon: Users },
+      { name: 'INVENTORY', path: '/inventory', icon: Box },
     ];
   
   }  else if (role === 'aso') {
       // MENU KHUSUS ASO (Hanya Dashboard, Control Kegiatan, dan Inventory)
       menuItems =[
-        { name: 'DASHBOARD', path: '/dashboard' },
-        { name: 'CONTROL KEGIATAN', path: '/control-kegiatan' },
-        { name: 'INVENTORY', path: '/inventory' },
+        { name: 'DASHBOARD', path: '/dashboard', icon: LayoutDashboard},
+        { name: 'CONTROL KEGIATAN', path: '/control-kegiatan', icon: LaptopMinimalCheck },
+        { name: 'INVENTORY', path: '/inventory', icon: Box },
       ];
   }  else if (role === 'hai') {
       // MENU KHUSUS HAI (Hanya Dashboard, Control Kegiatan, Control Sitac, dan Inventory)
       menuItems =[
-        { name: 'DASHBOARD', path: '/dashboard' },
-        { name: 'CONTROL KEGIATAN', path: '/control-kegiatan' },
-        { name: 'CONTROL SITAC', path: '/control-sitac' },
-        { name: 'INVENTORY', path: '/inventory' },
+        { name: 'DASHBOARD', path: '/dashboard', icon: LayoutDashboard},
+        { name: 'CONTROL KEGIATAN', path: '/control-kegiatan', icon: LaptopMinimalCheck },
+        { name: 'CONTROL SITAC', path: '/control-sitac', icon: MapPinned },
+        { name: 'INVENTORY', path: '/inventory', icon: Box },
       ];
     }
   else {
     // MENU DEFAULT UNTUK SUPERADMIN / MANAGER
     menuItems =[
-      { name: 'DASHBOARD', path: '/dashboard' },
-      { name: 'CONTROL KEGIATAN', path: '/control-kegiatan' },
-      { name: 'CONTROL PIHAK KETIGA', path: '/control-pihak-ketiga' },
-      { name: 'CONTROL LAPORAN SITAC', path: '/control-sitac' },
-      { name: 'INVENTORY', path: '/inventory' },
+      { name: 'DASHBOARD', path: '/dashboard', icon: LayoutDashboard},
+      { name: 'CONTROL KEGIATAN', path: '/control-kegiatan', icon: LaptopMinimalCheck },
+      { name: 'CONTROL PIHAK KETIGA', path: '/control-pihak-ketiga', icon: Users },
+      { name: 'CONTROL LAPORAN SITAC', path: '/control-sitac', icon: MapPinned },
+      { name: 'INVENTORY', path: '/inventory', icon: Box },
     ];
   }
 
@@ -168,21 +169,29 @@ const Layout = ({ children }) => {
             </div>
 
             <nav className="flex-1 px-4 py-2 space-y-4 overflow-hidden">
-              <div className="h-[3px] bg-white/30 w-full mb-6"></div>
-              
-              {menuItems.map((item) => (
-                <button
-                  key={item.path}
-                  onClick={() => navigate(item.path)}
-                  className={`w-full text-left p-3 rounded-lg text-[11px] font-bold transition-all border whitespace-nowrap select-none ${
-                    location.pathname === item.path 
-                    ? 'bg-[#76c7e6] text-white border-white shadow-md' 
-                    : 'text-white border-transparent hover:bg-[#4a97b5]'
-                  }`}
-                >
-                  {item.name}
-                </button>
-              ))}
+  <div className="h-[3px] bg-white/30 w-full mb-6"></div>
+  
+              {menuItems.map((item) => {
+                // Ambil komponen icon dari item
+                const Icon = item.icon; 
+
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => navigate(item.path)}
+                    // Tambahkan 'flex items-center gap-3' di className ini agar sejajar dengan teks
+                    className={`w-full text-left p-3 rounded-lg text-[11px] font-bold transition-all border whitespace-nowrap select-none flex items-center gap-3 ${
+                      location.pathname === item.path 
+                      ? 'bg-[#76c7e6] text-white border-white shadow-md' 
+                      : 'text-white border-transparent hover:bg-[#4a97b5]'
+                    }`}
+                  >
+                    {/* Render Icon di Samping Teks */}
+                    {Icon && <Icon size={18} strokeWidth={2.5} />}
+                    {item.name}
+                  </button>
+                );
+              })}
             </nav>
 
             <div className="p-4 border-t border-white/30">
