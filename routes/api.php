@@ -7,14 +7,18 @@ use App\Http\Controllers\Api\LaporanSitacController;
 use App\Http\Controllers\Api\InventoryController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\OltDeviceController;
+use App\Http\Controllers\Api\UserController;
+
+
 
 
 Route::middleware(['auth:sanctum', 'RestrictManagerWrite'])->group(function () {
     Route::get('/inventories', [InventoryController::class, 'index']);
     Route::post('/inventories', [InventoryController::class, 'store']);
     Route::put('/inventories/{id}', [InventoryController::class, 'update']);
-    Route::delete('/inventories/{id}',[InventoryController::class, 'destroy']);
-    Route::get('/inventories/export',[InventoryController::class, 'export']);
+    Route::delete('/inventories/{id}', [InventoryController::class, 'destroy']);
+    Route::get('/inventories/export', [InventoryController::class, 'export']);
     // Route khusus untuk toggle status
     Route::patch('/activities/{id}/status', [ActivityController::class, 'updateStatus']);
     // Endpoint untuk Control Pihak Ketiga
@@ -30,8 +34,13 @@ Route::middleware(['auth:sanctum', 'RestrictManagerWrite'])->group(function () {
     Route::patch('/laporan-sitacs/{id}/status', [LaporanSitacController::class, 'updateStatus']);
     Route::delete('/laporan-sitacs/{id}', [LaporanSitacController::class, 'destroy']);
     Route::get('/activities/export', [ActivityController::class, 'export']);
-        
+
     // Dan semua route tulis/tambah lainnya
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    // ... route lainnya ...
+    
 });
 
 
@@ -39,6 +48,7 @@ Route::get('/activities', [ActivityController::class, 'index']);
 Route::post('/activities', [ActivityController::class, 'store']);
 Route::put('/activities/{id}', [ActivityController::class, 'update']);
 Route::delete('/activities/{id}', [ActivityController::class, 'destroy']);
+Route::apiResource('users', UserController::class);
 // Route khusus untuk toggle status
 Route::patch('/activities/{id}/status', [ActivityController::class, 'updateStatus']);
 // Endpoint untuk Control Pihak Ketiga
@@ -55,6 +65,8 @@ Route::put('/laporan-sitacs/{id}', [LaporanSitacController::class, 'update']);
 Route::patch('/laporan-sitacs/{id}/status', [LaporanSitacController::class, 'updateStatus']);
 Route::delete('/laporan-sitacs/{id}', [LaporanSitacController::class, 'destroy']);
 Route::get('laporan-sitacs/download/{id}', [LaporanSitacController::class, 'downloadFile']);
+Route::get('/laporan-sitacs/export', [LaporanSitacController::class, 'export']);
+Route::get('/laporan-sitacs', [LaporanSitacController::class, 'index']);
 // Route untuk Inventory
 Route::get('/inventories', [InventoryController::class, 'index']);
 Route::post('/inventories', [InventoryController::class, 'store']);
@@ -65,6 +77,10 @@ Route::get('/inventories/export', [InventoryController::class, 'export']);
 // Tambahkan baris ini di atas Route::get('/activities/{id}', ...)
 Route::get('/activities/export', [ActivityController::class, 'export']);
 Route::get('/dashboard', [App\Http\Controllers\Api\DashboardController::class, 'index']);
+// Route khusus untuk olt devices
+Route::apiResource('olt-devices', OltDeviceController::class);
+Route::patch('/olt-devices/{id}/status-battery', [OltDeviceController::class, 'updateBatteryStatus']);
+
 
 // Route Publik (Bisa diakses tanpa login)
 Route::post('/login', [AuthController::class, 'login']);

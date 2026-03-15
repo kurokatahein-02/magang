@@ -5,7 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Activity;
 use Illuminate\Http\Request;
-
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ActivitiesExport;
 class ActivityController extends Controller
 {
     // Mengambil semua data untuk ditampilkan di tabel React
@@ -21,11 +22,21 @@ class ActivityController extends Controller
         // 2. Global Search (Nama, Unit, Status)
         if ($request->has('search')) {
             $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('nama_kegiatan', 'like', '%' . $searchTerm . '%')
-                ->orWhere('unit', 'like', '%' . $searchTerm . '%')
-                ->orWhere('status', 'like', '%' . $searchTerm . '%');
+                    ->orWhere('unit', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('status', 'like', '%' . $searchTerm . '%');
             });
+
+            // 3. Filter berdasarkan Bulan
+            if ($request->has('month') && $request->month != '') {
+                $query->whereMonth('tanggal_mulai', $request->month);
+            }
+
+            // 4. Filter berdasarkan Tahun
+            if ($request->has('year') && $request->year != '') {
+                $query->whereYear('tanggal_mulai', $request->year);
+            }
         }
 
         $data = $query->latest()->get();
@@ -47,7 +58,7 @@ class ActivityController extends Controller
             'nama_kegiatan'   => $request->nama_kegiatan,
             'unit'            => $request->unit,
             'tanggal_mulai'   => $request->tanggal_mulai,
-            'tanggal_berakhir'=> $request->tanggal_berakhir, // opsional
+            'tanggal_berakhir' => $request->tanggal_berakhir, // opsional
             'status'          => $request->status,
         ]);
 
@@ -81,7 +92,7 @@ class ActivityController extends Controller
             // Jika Open diklik -> Berubah jadi Close
             $activity->status = 'Close';
             // Mengisi tanggal berakhir dengan tanggal hari ini
-            $activity->tanggal_berakhir = now()->format('Y-m-d'); 
+            $activity->tanggal_berakhir = now()->format('Y-m-d');
         } else {
             // Jika Close diklik -> Berubah jadi Open (Reset tanggal berakhir)
             $activity->status = 'Open';
@@ -99,53 +110,9 @@ class ActivityController extends Controller
 
     public function export(Request $request)
     {
-        $query = Activity::query(); // Pastikan nama Model sesuai (Activity/Kegiatan)
+        $unitLabel = strtoupper($request->unit ?? 'ALL');
+        $fileName = 'Laporan_Kegiatan_' . $unitLabel . '_' . now()->format('Ymd_His') . '.xlsx';
 
-        // 1. Terapkan Filter Unit yang sama dengan fungsi index
-        if ($request->has('unit') && $request->unit != 'ALL') {
-            $query->where('unit', $request->unit);
-        }
-
-        // 2. Terapkan Search yang sama dengan fungsi index
-        if ($request->has('search')) {
-            $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('nama_kegiatan', 'like', '%' . $searchTerm . '%')
-                ->orWhere('unit', 'like', '%' . $searchTerm . '%')
-                ->orWhere('status', 'like', '%' . $searchTerm . '%');
-            });
-        }
-
-        $data = $query->latest()->get();
-
-        // 3. Konfigurasi CSV
-        $fileName = 'Laporan_Kegiatan_' . now()->format('Y-m-d_H-i-s') . '.csv';
-        $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=$fileName",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
-        ];
-
-        $callback = function() use ($data) {
-            $file = fopen('php://output', 'w');
-            // Header Kolom Excel
-            fputcsv($file, ['ID', 'Nama Kegiatan', 'Unit', 'Tanggal Mulai', 'Tanggal Berakhir', 'Status']);
-
-            foreach ($data as $item) {
-                fputcsv($file, [
-                    $item->id,
-                    $item->nama_kegiatan,
-                    $item->unit,
-                    $item->tanggal_mulai,
-                    $item->tanggal_berakhir ?? '-',
-                    $item->status
-                ]);
-            }
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return Excel::download(new ActivitiesExport($request), $fileName);
     }
-}   
+}

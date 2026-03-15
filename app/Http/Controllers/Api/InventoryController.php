@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Inventory;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\InventoryExport;
 
 class InventoryController extends Controller
 {
@@ -21,11 +23,11 @@ class InventoryController extends Controller
         // Fitur Search
         if ($request->has('search')) {
             $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('nama_barang', 'like', '%' . $searchTerm . '%')
-                ->orWhere('jumlah_barang', 'like', '%' . $searchTerm . '%')
-                ->orWhere('unit', 'like', '%' . $searchTerm . '%')
-                ->orWhere('lokasi', 'like', '%' . $searchTerm . '%');
+                    ->orWhere('jumlah_barang', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('unit', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('lokasi', 'like', '%' . $searchTerm . '%');
             });
         }
         $data = $query->latest()->get();
@@ -62,55 +64,9 @@ class InventoryController extends Controller
 
     public function export(Request $request)
     {
-        // 1. Ambil data dengan logika yang sama seperti index (Filter & Search)
-        $query = Inventory::query();
+        $unitLabel = strtoupper($request->unit ?? 'ALL');
+        $fileName = 'Laporan_Inventory_' . $unitLabel . '_' . now()->format('Ymd_His') . '.xlsx';
 
-        if ($request->has('unit') && $request->unit != 'ALL') {
-            $query->where('unit', $request->unit);
-        }
-
-        if ($request->has('search')) {
-            $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('nama_barang', 'like', '%' . $searchTerm . '%')
-                ->orWhere('jumlah_barang', 'like', '%' . $searchTerm . '%')
-                ->orWhere('unit', 'like', '%' . $searchTerm . '%')
-                ->orWhere('lokasi', 'like', '%' . $searchTerm . '%');
-            });
-        }
-
-        $data = $query->latest()->get();
-
-        // 2. Setup Header untuk file CSV
-        $fileName = 'Inventory_Report_' . now()->format('Y-m-d_H-i-s') . '.csv';
-        $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=$fileName",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
-        ];
-
-        // 3. Membuat isi file
-        $callback = function() use ($data) {
-            $file = fopen('php://output', 'w');
-            
-            // Header Kolom di Excel
-            fputcsv($file, ['ID', 'Nama Barang', 'Jumlah', 'Unit', 'Lokasi', 'Tanggal Input']);
-
-            foreach ($data as $item) {
-                fputcsv($file, [
-                    $item->id,
-                    $item->nama_barang,
-                    $item->jumlah_barang,
-                    $item->unit,
-                    $item->lokasi,
-                    $item->created_at->format('Y-m-d')
-                ]);
-            }
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return Excel::download(new InventoryExport($request), $fileName);
     }
 }

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\LaporanSitac;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\LaporanSitacExport;
 
 class LaporanSitacController extends Controller
 {
@@ -27,8 +29,8 @@ class LaporanSitacController extends Controller
             'dokumen' => 'required|mimes:pdf|max:5120',
         ]);
 
-        $path = $request->hasFile('dokumen') 
-            ? $request->file('dokumen')->store('documents/sitac', 'public') 
+        $path = $request->hasFile('dokumen')
+            ? $request->file('dokumen')->store('documents/sitac', 'public')
             : null;
 
         $sitac = LaporanSitac::create([
@@ -74,7 +76,7 @@ class LaporanSitacController extends Controller
         $sitac->save();
 
         return response()->json([
-            'success' => true, 
+            'success' => true,
             'message' => 'Status berhasil diperbarui',
             'data' => $sitac
         ]);
@@ -106,5 +108,11 @@ class LaporanSitacController extends Controller
         }
 
         return response()->download($path);
+    }
+
+    public function export()
+    {
+        $fileName = 'Laporan_SITAC_' . now()->format('Ymd_His') . '.xlsx';
+        return Excel::download(new LaporanSitacExport, $fileName);
     }
 }
