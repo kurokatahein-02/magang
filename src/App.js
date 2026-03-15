@@ -20,6 +20,7 @@ function App() {
         <Route path="/control-pihak-ketiga" element={<Layout />} />
         <Route path="/control-sitac" element={<Layout />} />
         <Route path="/inventory" element={<Layout />} />
+        <Route path="/kelola-akun" element={<Layout />} />
       </Routes> 
     </Router>
   );

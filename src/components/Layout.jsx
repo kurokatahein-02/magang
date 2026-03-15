@@ -3,18 +3,20 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import myLogo from '../assets/logo-tif.png'; 
 import { LayoutDashboard, LaptopMinimalCheck, Users, MapPinned, Box} from 'lucide-react'; // Contoh icon, bisa diganti sesuai kebutuhan
 
+
 // 1. IMPORT COMPONENT DEFAULT (Superadmin / Manager)
 import Dashboard from '../pages/Dashboard';
 import ControlKegiatanDefault from '../pages/ControlKegiatan';
 import ControlPihakKetigaDefault from '../pages/ControlPihakKetiga';
 import ControlSitacDefault from '../pages/ControlSitac';
 import InventoryDefault from '../pages/Inventory';
+import KelolaAkun from '../pages/KelolaAkun';
 
 
 // 2. IMPORT COMPONENT KHUSUS DIVISI ISP
 import ControlKegiatanISP from '../pages/isp/ControlKegiatanISP';
 import InventoryISP from '../pages/isp/InventoryISP';
-import ControlSitacISP from '../pages/isp/ControlSitacISP';
+import MapPersebaranOLT from '../pages/isp/MapPersebaranOLT';
 import DashboardISP from '../pages/isp/DashboardISP';
 
 // IMPORT COMPONENT KHUSUS DIVISI OSP
@@ -45,6 +47,7 @@ const Layout = ({ children }) => {
   const userData = userRaw ? JSON.parse(userRaw) : null;
   const role = userData?.role || '';
 
+
   let roleLabel = '';
   if (role === 'manager') {
     roleLabel = 'MANAGER';
@@ -63,6 +66,7 @@ const Layout = ({ children }) => {
     '/control-pihak-ketiga': 'CONTROL PIHAK KE TIGA',
     '/control-sitac': 'CONTROL SITAC',
     '/inventory': 'INVENTORY',
+    '/kelola-akun': 'KELOLA AKUN',
   };
 
   const currentTitle = pageTitles[location.pathname] || 'DASHBOARD';
@@ -75,7 +79,7 @@ const Layout = ({ children }) => {
     menuItems =[
       { name: 'DASHBOARD', path: '/dashboard', icon: LayoutDashboard},
       { name: 'CONTROL KEGIATAN', path: '/control-kegiatan', icon: LaptopMinimalCheck },
-      { name: 'CONTROL LAPORAN SITAC', path: '/control-sitac', icon: MapPinned },
+      { name: 'MAP PERSEBARAN OLT', path: '/control-sitac', icon: MapPinned },
       { name: 'INVENTORY', path: '/inventory', icon: Box },
     ];
   } else if (role === 'osp') {
@@ -107,10 +111,11 @@ const Layout = ({ children }) => {
     // MENU DEFAULT UNTUK SUPERADMIN / MANAGER
     menuItems =[
       { name: 'DASHBOARD', path: '/dashboard', icon: LayoutDashboard},
-      { name: 'CONTROL KEGIATAN', path: '/control-kegiatan', icon: LaptopMinimalCheck },
-      { name: 'CONTROL PIHAK KETIGA', path: '/control-pihak-ketiga', icon: Users },
-      { name: 'CONTROL LAPORAN SITAC', path: '/control-sitac', icon: MapPinned },
+      { name: 'KEGIATAN', path: '/control-kegiatan', icon: LaptopMinimalCheck },
+      { name: 'PIHAK KETIGA', path: '/control-pihak-ketiga', icon: Users },
+      { name: 'LAPORAN/SITAC', path: '/control-sitac', icon: MapPinned },
       { name: 'INVENTORY', path: '/inventory', icon: Box },
+      { name: 'KELOLA AKUN', path: '/kelola-akun', icon: Users },
     ];
   }
 
@@ -140,7 +145,7 @@ const Layout = ({ children }) => {
         return <ControlPihakKetigaDefault />;
         
       case '/control-sitac':
-        if (role === 'isp') return <ControlSitacISP />;
+        if (role === 'isp') return <MapPersebaranOLT />;
         if (role === 'hai') return <ControlSitacHAI />;
         return <ControlSitacDefault />;
         
@@ -150,6 +155,9 @@ const Layout = ({ children }) => {
         if (role === 'aso') return <InventoryASO />;
         if (role === 'hai') return <InventoryHAI />;
         return <InventoryDefault />;
+
+      case '/kelola-akun':
+        return <KelolaAkun />;
         
       default:
         // Fallback kalau path ga ada di atas (misal halaman kosong)
