@@ -7,40 +7,45 @@ use App\Models\Activity;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ActivitiesExport;
+
 class ActivityController extends Controller
 {
     // Mengambil semua data untuk ditampilkan di tabel React
     public function index(Request $request)
     {
-        $query = Activity::query(); // Sesuaikan nama Model Anda
+        // Mulai query
+        $query = Activity::query();
 
-        // 1. Filter berdasarkan Unit
-        if ($request->has('unit') && $request->unit != 'ALL') {
+        // Filter Unit (Jika 'ALL' maka jangan filter unit)
+        if ($request->has('unit') && $request->unit !== 'ALL') {
             $query->where('unit', $request->unit);
         }
 
-        // 2. Global Search (Nama, Unit, Status)
-        if ($request->has('search')) {
-            $searchTerm = $request->search;
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('nama_kegiatan', 'like', '%' . $searchTerm . '%')
-                    ->orWhere('unit', 'like', '%' . $searchTerm . '%')
-                    ->orWhere('status', 'like', '%' . $searchTerm . '%');
+        // Filter Search
+        if ($request->has('search') && $request->search !== '') {
+            $query->where(function ($q) use ($request) {
+                $q->where('nama_kegiatan', 'like', '%' . $request->search . '%')
+                    ->orWhere('status', 'like', '%' . $request->search . '%');
             });
-
-            // 3. Filter berdasarkan Bulan
-            if ($request->has('month') && $request->month != '') {
-                $query->whereMonth('tanggal_mulai', $request->month);
-            }
-
-            // 4. Filter berdasarkan Tahun
-            if ($request->has('year') && $request->year != '') {
-                $query->whereYear('tanggal_mulai', $request->year);
-            }
         }
 
-        $data = $query->latest()->get();
-        return response()->json(['success' => true, 'data' => $data]);
+        // Filter Bulan (PENTING: Pastikan kolom di DB adalah date/datetime)
+        if ($request->filled('month')) {
+            $query->whereMonth('tanggal_mulai', $request->month);
+        }
+
+        // Filter Tahun
+        if ($request->filled('year')) {
+            $query->whereYear('tanggal_mulai', $request->year);
+        }
+
+        // Ambil data terbaru
+        $activities = $query->latest()->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $activities
+        ], 200);
     }
 
     // Menyimpan data baru dari form React
