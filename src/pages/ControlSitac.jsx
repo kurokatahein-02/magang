@@ -9,7 +9,7 @@ import {
   ChevronDown,
   Plus,
 } from "lucide-react";
-import axios from "axios";
+import api from "../api";
 import {
   MapContainer,
   TileLayer,
@@ -70,6 +70,7 @@ const ControlSitac = () => {
   const userRaw = localStorage.getItem("user");
   const userData = userRaw ? JSON.parse(userRaw) : null;
   const role = userData?.role || "";
+  const [activeFilter, setActiveFilter] = useState("ALL");
 
   // Variabel Sakti
   const isReadOnly = role === "manager";
@@ -92,7 +93,7 @@ const ControlSitac = () => {
 
   const fetchVendors = async () => {
     try {
-      const response = await axios.get(API_URL);
+      const response = await api.get(API_URL);
       const mappedData = response.data.data.map((v) => ({
         id: v.id,
         name: v.nama_vendor,
@@ -121,7 +122,7 @@ const ControlSitac = () => {
     try {
       // 1. Panggil API download khusus SITAC
       // API_URL biasanya bernilai 'http://127.0.0.1:8000/api/laporan-sitacs'
-      const response = await axios.get(`${API_URL}/download/${item.id}`, {
+      const response = await api.get(`${API_URL}/download/${item.id}`, {
         responseType: "blob", // Wajib untuk file PDF
       });
 
@@ -150,9 +151,40 @@ const ControlSitac = () => {
     }
   };
 
-  const handleExportExcel = () => {
-    // Panggil endpoint export yang baru dibuat
-    window.open(`http://127.0.0.1:8000/api/laporan-sitacs/export`, "_blank");
+  const handleExportExcel = async () => {
+    try {
+      const response = await api.get("/laporan-sitacs/export", {
+        responseType: "blob",
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+
+      // Format tanggal YYYY-MM-DD
+      const today = new Date();
+      const formattedDate = today.toISOString().split("T")[0]; // → "2026-03-20"
+
+      // atau kalau mau include jam-menit (lebih unik, ga bentrok kalau export berkali-kali)
+      const formattedDateTime = today
+        .toISOString()
+        .replace(/[:.]/g, "-")
+        .split("T")
+        .join("_")
+        .slice(0, 19);
+      // → "2026-03-20_16-07-00" (contoh)
+
+      // Pilih salah satu, lalu gabung ke nama file
+      const fileName = `Laporan_SITACS ${formattedDate}.xlsx`;
+
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      console.error("Gagal export SITAC:", error);
+      alert("Gagal mengunduh laporan SITAC.");
+    }
   };
 
   const toggleStatus = async (id, e) => {
@@ -162,7 +194,7 @@ const ControlSitac = () => {
     if (!window.confirm("Apakah anda ingin mengubah status?")) return;
 
     try {
-      const response = await axios.patch(`${API_URL}/${id}/status`);
+      const response = await api.patch(`${API_URL}/${id}/status`);
       if (response.data && response.data.success) {
         // Sangat Penting: Panggil fetchVendors() agar data terbaru ditarik
         await fetchVendors();
@@ -230,13 +262,13 @@ const ControlSitac = () => {
         // Laravel butuh _method PUT jika mengirim FormData lewat POST
         data.append("_method", "PUT");
 
-        await axios.post(`${API_URL}/${formData.id}`, data, {
+        await api.post(`${API_URL}/${formData.id}`, data, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         console.log("Data SITAC berhasil diperbarui");
       } else {
         // --- LOGIKA SIMPAN BARU ---
-        await axios.post(API_URL, data, {
+        await api.post(API_URL, data, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         console.log("Data SITAC baru berhasil disimpan");
@@ -276,7 +308,7 @@ const ControlSitac = () => {
     e.stopPropagation();
     if (window.confirm("Hapus data vendor ini?")) {
       try {
-        await axios.delete(`${API_URL}/${id}`);
+        await api.delete(`${API_URL}/${id}`);
         fetchVendors();
       } catch (error) {
         alert("Gagal menghapus data");

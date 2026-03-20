@@ -7,7 +7,7 @@ import {
   Trash2,
   Edit,
 } from "lucide-react";
-import axios from "axios";
+import api from '../../api';
 import {
   MapContainer,
   TileLayer,
@@ -82,7 +82,7 @@ const MapPersebaranOLT = () => {
 
   const fetchDevices = async () => {
     try {
-      const response = await axios.get(API_URL);
+      const response = await api.get(API_URL);
       const mappedData = response.data.data.map((d) => ({
         id: d.id,
         name: d.nama_perangkat,
@@ -133,9 +133,9 @@ const MapPersebaranOLT = () => {
 
     try {
       if (view === "edit") {
-        await axios.put(`${API_URL}/${formData.id}`, payload);
+        await api.put(`${API_URL}/${formData.id}`, payload);
       } else {
-        await axios.post(API_URL, payload);
+        await api.post(API_URL, payload);
       }
       fetchDevices();
       resetForm();
@@ -163,7 +163,7 @@ const MapPersebaranOLT = () => {
     e.stopPropagation();
     if (window.confirm("Hapus data perangkat OLT ini?")) {
       try {
-        await axios.delete(`${API_URL}/${id}`);
+        await api.delete(`${API_URL}/${id}`);
         fetchDevices();
       } catch (error) {
         alert("Gagal menghapus data");
@@ -222,7 +222,7 @@ const MapPersebaranOLT = () => {
     if (!confirmChange) return;
 
     try {
-      const response = await axios.patch(`${API_URL}/${id}/status-battery`, {
+      const response = await api.patch(`${API_URL}/${id}/status-battery`, {
         status_baterai: newStatus,
       });
 

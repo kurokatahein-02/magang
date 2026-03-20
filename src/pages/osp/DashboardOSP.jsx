@@ -7,7 +7,7 @@ import {
   Package,
   MapPin,
 } from "lucide-react";
-import axios from "axios";
+import api from '../../api';
 import { MapContainer, TileLayer, Marker, Popup, Tooltip } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -43,7 +43,7 @@ const DashboardOSP = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(DASHBOARD_API, {
+      const response = await api.get(DASHBOARD_API, {
         params: {
           unit: "OSP",
           month: selectedMonth,
@@ -52,7 +52,7 @@ const DashboardOSP = () => {
       });
       setData(response.data.data);
       // 2. Ambil data KHUSUS inventory ISP untuk dihitung jumlah barangnya
-      const responseInv = await axios.get(INVENTORY_API, {
+      const responseInv = await api.get(INVENTORY_API, {
         params: { unit: "OSP" },
       });
       setOspInventoryCount(responseInv.data.data.length);
@@ -156,18 +156,18 @@ const DashboardOSP = () => {
       </div>
 
       {/* --- 1. BARIS ATAS: 4 KOTAK STATISTIK --- */}
-      <div className="flex gap-6 shrink-0 h-24">
+      <div className="flex gap-4 shrink-0 h-24">
         <StatCard
           title="Total Kegiatan"
           value={totalKegiatanOSP}
           icon={LayoutDashboard}
           color="bg-white"
-          iconColor="text-black"
+          iconColor="text-gray-500"
         />
         <StatCard
           title="Open"
           value={`${OSPStats.open_count}`}
-          icon={DoorClosed}
+          icon={DoorOpen}
           color="bg-red-100"
           iconColor="text-red-500"
         />
@@ -182,8 +182,8 @@ const DashboardOSP = () => {
           title="Progres"
           value={`${progressOSP}%`}
           icon={Timer}
-          color="bg-orange-400"
-          iconColor="text-white"
+          color="bg-orange-100"
+          iconColor="text-orange-500"
         />
       </div>
 

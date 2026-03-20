@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { CalendarDays, ChevronDown, Download } from "lucide-react";
-import axios from "axios";
+import api from '../../api';
 
 // Konfigurasi Base URL Laravel
 const API_URL = "http://127.0.0.1:8000/api/activities";
@@ -34,22 +34,58 @@ const ControlKegiatanHAI = () => {
   });
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleExportExcel = () => {
-    // Memaksa ekspor hanya untuk data HAI
-    const queryParams = new URLSearchParams({
-      unit: "hai",
-      search: searchTerm,
-      month: selectedMonth,
-      year: selectedYear,
-    }).toString();
+  const handleExportExcel = async () => {
+    try {
+      // 1. Panggil API menggunakan axios instance 'api' agar token terkirim
+      const response = await api.get("/activities/export", {
+        params: {
+          unit: "HAI", // Pastikan export hanya untuk HAI 
+          search: searchTerm,
+          month: selectedMonth,
+          year: selectedYear,
+        },
+        responseType: "blob", // PENTING: Untuk menerima data file/binary
+      });
 
-    window.open(`${API_URL}/export?${queryParams}`, "_blank");
+      // 2. Buat URL sementara untuk file tersebut
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+
+      // Format tanggal YYYY-MM-DD
+      const today = new Date();
+      const formattedDate = today.toISOString().split("T")[0]; // → "2026-03-20"
+
+      // atau kalau mau include jam-menit (lebih unik, ga bentrok kalau export berkali-kali)
+      const formattedDateTime = today
+        .toISOString()
+        .replace(/[:.]/g, "-")
+        .split("T")
+        .join("_")
+        .slice(0, 19);
+      // → "2026-03-20_16-07-00" (contoh)
+
+      // Pilih salah satu, lalu gabung ke nama file
+      const fileName = `Laporan_Kegiatan_HAI ${formattedDate}.xlsx`;
+      link.setAttribute("download", fileName);
+
+      // 4. Picu klik otomatis untuk download
+      document.body.appendChild(link);
+      link.click();
+
+      // 5. Bersihkan memori
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Gagal mendownload excel:", error);
+      alert("Gagal mengunduh laporan. Pastikan Anda memiliki izin.");
+    }
   };
 
   // --- FETCH DATA DARI BACKEND KHUSUS HAI ---
   const fetchActivities = async () => {
     try {
-      const response = await axios.get(API_URL, {
+      const response = await api.get(API_URL, {
         params: {
           unit: "hai", // <--- MEMAKSA HANYA AMBIL DATA HAI
           search: searchTerm,
@@ -105,7 +141,7 @@ const ControlKegiatanHAI = () => {
       return alert("Isi data terlebih dahulu!");
 
     try {
-      await axios.post(API_URL, {
+      await api.post(API_URL, {
         nama_kegiatan: formData.name,
         unit: "hai", // Pastikan tersimpan sebagai HAI
         tanggal_mulai: formData.startDate,
@@ -130,7 +166,7 @@ const ControlKegiatanHAI = () => {
           formData.status === "Close" ? getRealtimeDate() : null,
       };
 
-      await axios.put(`${API_URL}/${formData.id}`, payload);
+      await api.put(`${API_URL}/${formData.id}`, payload);
       fetchActivities();
       resetForm();
     } catch (error) {
@@ -146,7 +182,7 @@ const ControlKegiatanHAI = () => {
     if (!confirmChange) return; // Jika pilih "Tidak", proses dibatalkan
 
     try {
-      const response = await axios.patch(`${API_URL}/${id}/status`);
+      const response = await api.patch(`${API_URL}/${id}/status`);
 
       if (response.data.success) {
         fetchActivities();
@@ -161,7 +197,7 @@ const ControlKegiatanHAI = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Hapus data ini?")) {
       try {
-        await axios.delete(`${API_URL}/${id}`);
+        await api.delete(`${API_URL}/${id}`);
         fetchActivities();
       } catch (error) {
         alert("Gagal menghapus data");

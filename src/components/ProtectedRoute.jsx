@@ -3,14 +3,11 @@ import { Navigate, Outlet } from 'react-router-dom';
 
 const ProtectedRoute = () => {
   const token = localStorage.getItem('token');
-  const user = localStorage.getItem('user');
-
-  // Jika token atau data user tidak ada, arahkan ke halaman login (/)
-  if (!token || !user) {
-    return <Navigate to="/" replace />;
+  // Pastikan token ada dan tidak kosong
+  if (!token || token === "undefined") {
+    return <Navigate to="/login" replace />;
   }
 
-  // Jika ada, izinkan akses ke halaman yang diminta
   return <Outlet />;
 };
 

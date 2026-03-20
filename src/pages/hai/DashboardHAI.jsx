@@ -7,7 +7,7 @@ import {
   Package,
   MapPin,
 } from "lucide-react";
-import axios from "axios";
+import api from '../../api';
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -32,22 +32,34 @@ const DashboardHAI = () => {
   const [HAIInventoryCount, setHAIInventoryCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
+  // Buat daftar tahun dari tahun ini mundur ke 2020
+  const currentYear = new Date().getFullYear();
+  const years = [];
+  for (let y = currentYear; y >= 2020; y--) {
+    years.push(y.toString());
+  }
 
   const fetchData = async () => {
     try {
-      // 1. Ambil data utama dashboard
-      const responseDash = await axios.get(DASHBOARD_API);
-      setData(responseDash.data.data);
-
+      const response = await api.get(DASHBOARD_API, {
+        params: {
+          unit: "HAI",
+          month: selectedMonth,
+          year: selectedYear,
+        },
+      });
+      setData(response.data.data);
       // 2. Ambil data KHUSUS inventory HAI untuk dihitung jumlah barangnya
-      const responseInv = await axios.get(INVENTORY_API, {
+      const responseInv = await api.get(INVENTORY_API, {
         params: { unit: "HAI" },
       });
       setHAIInventoryCount(responseInv.data.data.length);
-
       setLoading(false);
     } catch (error) {
-      console.error("Dashboard error:", error);
+      console.error("Dashboard HAI error:", error);
     }
   };
 
@@ -55,7 +67,7 @@ const DashboardHAI = () => {
     fetchData();
     const interval = setInterval(fetchData, 60000); // Auto refresh tiap 1 menit
     return () => clearInterval(interval);
-  }, []);
+  }, [selectedMonth, selectedYear]);
 
   if (loading)
     return (
@@ -90,15 +102,54 @@ const DashboardHAI = () => {
         </div>
 
         {/* Tampilan Periode dari Backend */}
-        <div className="bg-[#1a536e] text-white px-4 py-1.5 rounded-full flex items-center gap-2 shadow-sm border border-black">
-          <Timer size={14} />
-          <span className="text-[10px] font-bold uppercase tracking-tighter">
-            Periode Data: {data?.stats?.periode || "Memuat..."}
+        <div className="bg-[#1a536e] text-white px-4 py-1.5 rounded-full flex items-center gap-1 shadow-sm border border-black">
+          <Timer size={14} className="mr-1" />
+          <span className="text-[10px] font-bold uppercase tracking-tighter mr-1">
+            Periode:
           </span>
+
+          {/* Filter Bulan */}
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="bg-transparent text-[10px] font-bold uppercase focus:outline-none cursor-pointer hover:text-orange-300 transition-colors"
+          >
+            {[
+              "Januari",
+              "Februari",
+              "Maret",
+              "April",
+              "Mei",
+              "Juni",
+              "Juli",
+              "Agustus",
+              "September",
+              "Oktober",
+              "November",
+              "Desember",
+            ].map((m, i) => (
+              <option key={i} value={i + 1} className="text-black">
+                {m}
+              </option>
+            ))}
+          </select>
+
+          {/* Filter Tahun */}
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+            className="bg-transparent text-[10px] font-bold uppercase focus:outline-none cursor-pointer hover:text-orange-300 transition-colors"
+          >
+            {years.map((y) => (
+              <option key={y} value={y} className="text-black">
+                {y}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
-      {/* --- 1. BARIS ATAS: 4 KOTAK STATISTIK (KHUSUS HAI) --- */}
+      {/* --- 1. BARIS ATAS: 4 KOTAK STATISTIK (KHUSUS ISP) --- */}
       <div className="flex gap-6 shrink-0 h-24">
         <StatCard
           title="Total Kegiatan"
@@ -111,14 +162,14 @@ const DashboardHAI = () => {
           title="Open"
           value={`${HAIStats.open_count}`}
           icon={DoorOpen}
-          color="bg-green-500"
+          color="bg-red-500"
           iconColor="text-white"
         />
         <StatCard
           title="Close"
           value={`${HAIStats.close_count}`}
           icon={DoorClosed}
-          color="bg-red-500"
+          color="bg-green-500"
           iconColor="text-white"
         />
         <StatCard
@@ -225,9 +276,12 @@ const StatCard = ({ title, value, icon: Icon, color, iconColor }) => (
 
 // --- KOMPONEN DONUT CHART ---
 const DonutBox = ({ title, stats }) => {
-  // Logic untuk diagram Donut
+  // Logik Baru: Warna Hijau untuk Close, Merah untuk Open
   const donutStyle = {
-    background: `conic-gradient( #4ade80 ${stats.open_percent}%, #f87171 0 ${stats.open_percent + stats.close_percent}% )`,
+    background: `conic-gradient(
+      #4ade80 ${stats.close_percent}%, 
+      #f87171 0 ${stats.close_percent + stats.open_percent}%
+    )`,
   };
 
   return (
@@ -237,26 +291,29 @@ const DonutBox = ({ title, stats }) => {
       </div>
 
       <div className="flex items-center gap-12 mt-4">
+        {/* Lingkaran Donut Dinamis */}
         <div
-          className="w-36 h-36 rounded-full flex items-center justify-center relative shadow-inner"
+          className="w-32 h-32 rounded-full flex items-center justify-center relative shadow-inner"
           style={donutStyle}
         >
-          <div className="w-24 h-24 bg-white rounded-full flex flex-col items-center justify-center shadow-md">
-            <span className="text-2xl font-black text-gray-800">
-              {stats.open_percent}%
+          {/* Lubang Putih di Tengah - Sekarang Menampilkan Progres 'Close' */}
+          <div className="w-20 h-20 bg-white rounded-full flex flex-col items-center justify-center shadow-md">
+            <span className="text-xl font-black">{stats.close_percent}%</span>
+            <span className="text-[8px] uppercase font-bold text-gray-400 tracking-tighter">
+              Close Rate
             </span>
           </div>
         </div>
 
         <div className="space-y-4">
           <div className="text-sm font-bold flex items-center gap-3">
-            <div className="w-4 h-4 rounded-full bg-[#4ade80] shadow-sm"></div>
+            <div className="w-4 h-4 rounded-full bg-[#f87171] shadow-sm"></div>
             Open{" "}
             <span className="text-gray-600 ml-1">{stats.open_percent}%</span>
           </div>
 
           <div className="text-sm font-bold flex items-center gap-3">
-            <div className="w-4 h-4 rounded-full bg-[#f87171] shadow-sm"></div>
+            <div className="w-4 h-4 rounded-full  bg-[#4ade80] shadow-sm"></div>
             Close{" "}
             <span className="text-gray-600 ml-1">{stats.close_percent}%</span>
           </div>

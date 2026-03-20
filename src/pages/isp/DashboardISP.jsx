@@ -7,7 +7,7 @@ import {
   Package,
   MapPin,
 } from "lucide-react";
-import axios from "axios";
+import api from '../../api';
 import { MapContainer, TileLayer, Marker, Popup, Tooltip } from "react-leaflet"; //
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -43,7 +43,7 @@ const DashboardISP = () => {
   }
   const fetchData = async () => {
     try {
-      const response = await axios.get(DASHBOARD_API, {
+      const response = await api.get(DASHBOARD_API, {
         params: {
           unit: "ISP",
           month: selectedMonth,
@@ -52,7 +52,7 @@ const DashboardISP = () => {
       });
       setData(response.data.data);
       // 2. Ambil data KHUSUS inventory ISP untuk dihitung jumlah barangnya
-      const responseInv = await axios.get(INVENTORY_API, {
+      const responseInv = await api.get(INVENTORY_API, {
         params: { unit: "ISP" },
       });
       setISPInventoryCount(responseInv.data.data.length);
@@ -149,34 +149,34 @@ const DashboardISP = () => {
       </div>
 
       {/* --- 1. BARIS ATAS: 4 KOTAK STATISTIK (KHUSUS ISP) --- */}
-      <div className="flex gap-6 shrink-0 h-24">
+      <div className="flex gap-4 shrink-0">
         <StatCard
           title="Total Kegiatan"
           value={totalKegiatanISP}
           icon={LayoutDashboard}
-          color="bg-white"
+          color="bg-gray-100"
           iconColor="text-black"
         />
         <StatCard
           title="Open"
           value={`${ISPStats.open_count}`}
           icon={DoorOpen}
-          color="bg-green-500"
-          iconColor="text-white"
+          color="bg-red-100"
+          iconColor="text-red-500"
         />
         <StatCard
           title="Close"
           value={`${ISPStats.close_count}`}
           icon={DoorClosed}
-          color="bg-red-500"
-          iconColor="text-white"
+          color="bg-green-100"
+          iconColor="text-green-500"
         />
         <StatCard
           title="Progres"
           value={`${progressISP}%`}
           icon={Timer}
-          color="bg-orange-400"
-          iconColor="text-white"
+          color="bg-orange-100"
+          iconColor="text-orange-500"
         />
       </div>
 
@@ -197,7 +197,7 @@ const DashboardISP = () => {
             </div>
 
             <div className="flex-1 flex flex-col items-center justify-center">
-              <div className="text-5xl font-black mb-2 text-black">
+              <div className="text-5xl font-black mb-1 text-black">
                 {ISPInventoryCount}
               </div>
               <div className="text-[10px] uppercase font-bold text-gray-400 tracking-widest">
@@ -299,9 +299,12 @@ const StatCard = ({ title, value, icon: Icon, color, iconColor }) => (
 
 // --- KOMPONEN DONUT CHART ---
 const DonutBox = ({ title, stats }) => {
-  // Logic untuk diagram Donut
+  // Logik Baru: Warna Hijau untuk Close, Merah untuk Open
   const donutStyle = {
-    background: `conic-gradient( #4ade80 ${stats.open_percent}%, #f87171 0 ${stats.open_percent + stats.close_percent}% )`,
+    background: `conic-gradient(
+      #4ade80 ${stats.close_percent}%, 
+      #f87171 0 ${stats.close_percent + stats.open_percent}%
+    )`,
   };
 
   return (
@@ -311,26 +314,30 @@ const DonutBox = ({ title, stats }) => {
       </div>
 
       <div className="flex items-center gap-12 mt-4">
+        {/* Lingkaran Donut Dinamis */}
         <div
-          className="w-36 h-36 rounded-full flex items-center justify-center relative shadow-inner"
+          className="w-32 h-32 rounded-full flex items-center justify-center relative shadow-inner"
           style={donutStyle}
         >
-          <div className="w-24 h-24 bg-white rounded-full flex flex-col items-center justify-center shadow-md">
-            <span className="text-2xl font-black text-gray-800">
-              {stats.open_percent}%
+          {/* Lubang Putih di Tengah - Sekarang Menampilkan Progres 'Close' */}
+          <div className="w-20 h-20 bg-white rounded-full flex flex-col items-center justify-center shadow-md">
+            <span className="text-xl font-black">{stats.close_percent}%</span>
+            <span className="text-[8px] uppercase font-bold text-gray-400 tracking-tighter">
+              Close Rate
             </span>
           </div>
         </div>
 
+
         <div className="space-y-4">
           <div className="text-sm font-bold flex items-center gap-3">
-            <div className="w-4 h-4 rounded-full bg-[#4ade80] shadow-sm"></div>
+            <div className="w-4 h-4 rounded-full bg-[#f87171] shadow-sm"></div>
             Open{" "}
             <span className="text-gray-600 ml-1">{stats.open_percent}%</span>
           </div>
 
           <div className="text-sm font-bold flex items-center gap-3">
-            <div className="w-4 h-4 rounded-full bg-[#f87171] shadow-sm"></div>
+            <div className="w-4 h-4 rounded-full  bg-[#4ade80] shadow-sm"></div>
             Close{" "}
             <span className="text-gray-600 ml-1">{stats.close_percent}%</span>
           </div>

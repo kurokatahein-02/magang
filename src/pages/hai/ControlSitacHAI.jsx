@@ -9,7 +9,7 @@ import {
   ChevronDown,
   Plus,
 } from "lucide-react";
-import axios from "axios";
+import api from '../../api';
 import {
   MapContainer,
   TileLayer,
@@ -91,7 +91,7 @@ const ControlSitacHAI = () => {
 
   const fetchVendors = async () => {
     try {
-      const response = await axios.get(API_URL);
+      const response = await api.get(API_URL);
       const mappedData = response.data.data.map((v) => ({
         id: v.id,
         name: v.nama_vendor,
@@ -120,7 +120,7 @@ const ControlSitacHAI = () => {
     try {
       // 1. Panggil API download khusus SITAC
       // API_URL biasanya bernilai 'http://127.0.0.1:8000/api/laporan-sitacs'
-      const response = await axios.get(`${API_URL}/download/${item.id}`, {
+      const response = await api.get(`${API_URL}/download/${item.id}`, {
         responseType: "blob", // Wajib untuk file PDF
       });
 
@@ -156,7 +156,7 @@ const ControlSitacHAI = () => {
     if (!window.confirm("Apakah anda ingin mengubah status?")) return;
 
     try {
-      const response = await axios.patch(`${API_URL}/${id}/status`);
+      const response = await api.patch(`${API_URL}/${id}/status`);
       if (response.data && response.data.success) {
         // Sangat Penting: Panggil fetchVendors() agar data terbaru ditarik
         await fetchVendors();
@@ -224,13 +224,13 @@ const ControlSitacHAI = () => {
         // Laravel butuh _method PUT jika mengirim FormData lewat POST
         data.append("_method", "PUT");
 
-        await axios.post(`${API_URL}/${formData.id}`, data, {
+        await api.post(`${API_URL}/${formData.id}`, data, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         console.log("Data SITAC berhasil diperbarui");
       } else {
         // --- LOGIKA SIMPAN BARU ---
-        await axios.post(API_URL, data, {
+        await api.post(API_URL, data, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         console.log("Data SITAC baru berhasil disimpan");
@@ -270,7 +270,7 @@ const ControlSitacHAI = () => {
     e.stopPropagation();
     if (window.confirm("Hapus data vendor ini?")) {
       try {
-        await axios.delete(`${API_URL}/${id}`);
+        await api.delete(`${API_URL}/${id}`);
         fetchVendors();
       } catch (error) {
         alert("Gagal menghapus data");

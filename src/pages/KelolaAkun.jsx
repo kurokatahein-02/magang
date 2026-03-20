@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, ChevronDown, Plus } from "lucide-react";
-import axios from "axios";
+import api from '../api';
 
 const API_URL = "http://127.0.0.1:8000/api/users";
 
@@ -26,7 +26,7 @@ const KelolaAkun = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(API_URL);
+      const response = await api.get(API_URL);
       setUsers(response.data.data);
       setLoading(false);
     } catch (error) {
@@ -41,9 +41,9 @@ const KelolaAkun = () => {
   const handleSave = async () => {
     try {
       if (view === "edit") {
-        await axios.put(`${API_URL}/${formData.id}`, formData);
+        await api.put(`${API_URL}/${formData.id}`, formData);
       } else {
-        await axios.post(API_URL, formData);
+        await api.post(API_URL, formData);
       }
       fetchUsers();
       resetForm();
@@ -56,7 +56,7 @@ const KelolaAkun = () => {
     e.stopPropagation();
     if (window.confirm("Hapus akun user ini?")) {
       try {
-        await axios.delete(`${API_URL}/${id}`);
+        await api.delete(`${API_URL}/${id}`);
         fetchUsers();
       } catch (error) {
         console.error("Gagal menghapus:", error);

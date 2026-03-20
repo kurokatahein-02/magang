@@ -51,17 +51,31 @@ const Dashboard = () => {
   const isSuperAdmin = userData?.role === "superadmin";
 
   const fetchData = async () => {
+    // 1. Ambil token dari localStorage
+    const token = localStorage.getItem("token");
+
     try {
       const response = await axios.get(API_URL, {
         params: {
           month: selectedMonth,
           year: selectedYear,
         },
+        // 2. Tambahkan headers Authorization di sini
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+
       setData(response.data.data);
       setLoading(false);
     } catch (error) {
       console.error("Dashboard error:", error);
+      // Jika error 401, berarti token expired atau tidak valid
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/"; // Paksa login ulang
+      }
     }
   };
 
