@@ -95,14 +95,14 @@ const DashboardHAI = () => {
       {/* Penambahan Keterangan Tanggal/Periode Terkini */}
       <div className="flex justify-between items-center mb-2 px-2">
         <div className="flex items-center gap-2">
-          <LayoutDashboard size={24} className="text-[#56a8c7]" />
+          <LayoutDashboard size={24} className="text-[#386097]" />
           <h2 className="text-xl font-bold uppercase tracking-widest">
             Dashboard Overview
           </h2>
         </div>
 
         {/* Tampilan Periode dari Backend */}
-        <div className="bg-[#1a536e] text-white px-4 py-1.5 rounded-full flex items-center gap-1 shadow-sm border border-black">
+        <div className="bg-[#386097] text-white px-4 py-1.5 rounded-full flex items-center gap-1 shadow-sm border border-black">
           <Timer size={14} className="mr-1" />
           <span className="text-[10px] font-bold uppercase tracking-tighter mr-1">
             Periode:
@@ -162,22 +162,22 @@ const DashboardHAI = () => {
           title="Open"
           value={`${HAIStats.open_count}`}
           icon={DoorOpen}
-          color="bg-red-500"
-          iconColor="text-white"
+          color="bg-red-100"
+          iconColor="text-red-500"
         />
         <StatCard
           title="Close"
           value={`${HAIStats.close_count}`}
           icon={DoorClosed}
-          color="bg-green-500"
-          iconColor="text-white"
+          color="bg-green-100"
+          iconColor="text-green-500"
         />
         <StatCard
           title="Progres"
           value={`${progressHAI}%`}
           icon={Timer}
-          color="bg-orange-400"
-          iconColor="text-white"
+          color="bg-orange-100"
+          iconColor="text-orange-500"
         />
       </div>
 

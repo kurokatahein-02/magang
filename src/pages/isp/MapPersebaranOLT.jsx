@@ -276,7 +276,7 @@ const MapPersebaranOLT = () => {
                     <li
                       key={index}
                       onClick={() => selectLocation(item)}
-                      className="p-3 text-[11px] hover:bg-[#56a8c7] hover:text-white cursor-pointer border-b border-gray-100 last:border-none transition-colors"
+                      className="p-3 text-[11px] hover:bg-[#386097] hover:text-white cursor-pointer border-b border-gray-100 last:border-none transition-colors"
                     >
                       {item.display_name}
                     </li>
@@ -423,14 +423,14 @@ const MapPersebaranOLT = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={handleExportExcel}
-              className="bg-[#1a536e] text-white border border-black rounded-full px-6 py-2 flex items-center gap-2 font-bold text-xs shadow-sm hover:bg-black transition-all"
+              className="bg-[#51A0D2] text-white border border-black rounded-full px-6 py-2 flex items-center gap-2 font-bold text-xs shadow-sm hover:bg-black transition-all"
             >
               <Download size={18} /> Download Excel
             </button>
             {!isReadOnly && (
               <button
                 onClick={() => setView("form")}
-                className="bg-[#56a8c7] border border-black rounded-full px-6 py-2 flex items-center gap-2 font-bold text-xs shadow-sm hover:bg-[#4a97b5] transition-all"
+                className="bg-[#386097] border text-white rounded-full px-6 py-2 flex items-center gap-2 font-bold text-xs shadow-sm transition-all hover:bg-white hover:text-black"
               >
                 <Plus size={18} /> Tambah Perangkat OLT
               </button>
@@ -445,24 +445,26 @@ const MapPersebaranOLT = () => {
           >
             <div className="overflow-hidden rounded-t-[20px] border-x border-t border-black bg-white shadow-xl">
               <table className="w-full text-center border-collapse table-fixed">
-                <thead className="bg-[#56a8c7]">
+                <thead className="bg-[#386097]">
                   <tr className="text-[11px] font-bold">
-                    <th className="w-12 p-3 border-r border-b border-black">
+                    <th className="w-12 p-3 border-r border-b text-white">
                       NO
                     </th>
-                    <th className="p-3 border-r border-b border-black">
+                    <th className="p-3 border-r border-b text-white">
                       Nama Perangkat
                     </th>
-                    <th className="p-3 border-r border-b border-black">
+                    <th className="p-3 border-r border-b text-white">
                       Lokasi
                     </th>
-                    <th className="p-3 border-r border-b border-black">
+                    <th className="p-3 border-r border-b text-white">
                       Koordinat
                     </th>
-                    <th className="w-32 p-3 border-r border-b border-black">
+                    <th className="w-32 p-3 border-r border-b text-white">
                       Status Baterai
                     </th>
-                    <th className="w-40 p-3 border-b border-black"></th>
+                    <th className="w-40 p-3 border-b text-white">
+                      Opsi
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -509,15 +511,15 @@ const MapPersebaranOLT = () => {
                             <>
                               <button
                                 onClick={(e) => startEdit(v, e)}
-                                className="bg-[#56a8c7] border border-black rounded px-3 py-1 text-[10px] font-bold hover:bg-white transition-all"
+                                className="bg-[#386097] border text-white rounded px-3 py-1 text-[10px] font-bold transition-all hover:bg-white hover:text-black "
                               >
-                                <Edit size={14} />
+                                Edit
                               </button>
                               <button
                                 onClick={(e) => handleDelete(v.id, e)}
-                                className="bg-[#56a8c7] border border-black rounded px-3 py-1 text-[10px] font-bold hover:bg-white transition-all"
+                                className="bg-[#386097] border text-white rounded px-3 py-1 text-[10px] font-bold transition-all hover:bg-white hover:text-black"
                               >
-                                <Trash2 size={14} />
+                                Delete
                               </button>
                             </>
                           )}

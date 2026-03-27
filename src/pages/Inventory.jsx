@@ -270,7 +270,7 @@ const Inventory = () => {
                   onClick={() => setActiveFilter(f)}
                   className={`px-6 py-1 border border-black rounded-full font-bold text-[10px] shadow-sm transition-all ${
                     activeFilter === f
-                      ? "bg-[#56a8c7] text-white"
+                      ? "bg-[#386097] text-white"
                       : "bg-white hover:bg-gray-50"
                   }`}
                 >
@@ -284,7 +284,7 @@ const Inventory = () => {
               {/* Tombol Download Excel Baru */}
               <button
                 onClick={handleExportExcel}
-                className="bg-[#1a536e] text-white border border-black rounded-full px-6 py-2 flex items-center gap-2 font-bold text-[10px] shadow-sm hover:bg-black transition-all"
+                className="bg-[#51A0D2] text-white border border-black rounded-full px-6 py-2 flex items-center gap-2 font-bold text-[10px] shadow-sm hover:bg-black transition-all"
               >
                 <Download size={14} />
                 Download Excel
@@ -294,7 +294,7 @@ const Inventory = () => {
               {!isReadOnly && (
                 <button
                   onClick={() => setView("form")}
-                  className="bg-[#56a8c7] border border-black rounded-full px-4 py-1.5 flex items-center gap-2 font-bold text-[9px] shadow-sm hover:bg-[#4a97b5] active:scale-95 transition-all"
+                  className="bg-[#386097] border text-white rounded-full px-4 py-1.5 flex items-center gap-2 font-bold text-[9px] shadow-sm active:scale-95 transition-all hover:bg-white hover:text-black"
                 >
                   <span className="text-base">+</span> Tambah Inventori
                 </button>
@@ -310,24 +310,26 @@ const Inventory = () => {
       >
         <div className="overflow-hidden rounded-t-[20px] border-x border-t border-black bg-white shadow-xl">
           <table className="w-full text-center border-collapse table-fixed">
-            <thead className="bg-[#56a8c7]">
+            <thead className="bg-[#386097]">
               <tr>
-                <th className="w-12 p-3 border-r border-b border-black text-[11px] font-bold">
+                <th className="w-12 p-3 border-r border-b text-white text-[11px] font-bold">
                   NO
                 </th>
-                <th className="p-3 border-r border-b border-black text-[11px] font-bold">
+                <th className="p-3 border-r border-b text-white text-[11px] font-bold">
                   Nama Barang
                 </th>
-                <th className="p-3 border-r border-b border-black text-[11px] font-bold">
+                <th className="p-3 border-r border-b text-white text-[11px] font-bold">
                   Jumlah Barang
                 </th>
-                <th className="p-3 border-r border-b border-black text-[11px] font-bold">
+                <th className="p-3 border-r border-b text-white text-[11px] font-bold">
                   Unit
                 </th>
-                <th className="p-3 border-r border-b border-black text-[11px] font-bold">
+                <th className="p-3 border-r border-b text-white text-[11px] font-bold">
                   Lokasi
                 </th>
-                <th className="w-48 p-3 border-b border-black text-[11px] font-bold"></th>
+                <th className="w-48 p-3 border-b text-white text-[11px] font-bold">
+                  Opsi
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -353,21 +355,25 @@ const Inventory = () => {
                   </td>
                   <td className="px-4">
                     <div className="flex justify-center items-center gap-6">
-                      {!isReadOnly && (
+                      {!isReadOnly ? (
                         <>
                           <button
                             onClick={(e) => startEdit(item, e)}
-                            className="bg-[#56a8c7] border border-black rounded-md px-5 py-1 text-[10px] font-bold shadow-sm hover:bg-white transition-all whitespace-nowrap"
+                            className="bg-[#386097] border text-white rounded-md px-5 py-1 text-[10px] font-bold shadow-sm transition-all whitespace-nowrap hover:bg-white hover:text-black"
                           >
                             Edit
                           </button>
                           <button
                             onClick={(e) => handleAction(e, "delete", item.id)}
-                            className="bg-[#56a8c7] border border-black rounded-md px-5 py-1 text-[10px] font-bold shadow-sm hover:bg-white transition-all whitespace-nowrap"
+                            className="bg-[#386097] border text-white rounded-md px-5 py-1 text-[10px] font-bold shadow-sm transition-all whitespace-nowrap hover:bg-white hover:text-black"
                           >
                             Delete
                           </button>
                         </>
+                      ) : (
+                        <span className="text-[10px] italic text-gray-400">
+                          View Only
+                        </span>
                       )}
                     </div>
                   </td>

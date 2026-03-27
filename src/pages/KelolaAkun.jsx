@@ -189,9 +189,9 @@ const KelolaAkun = () => {
 
       {isSuperAdmin && (
         <div className="flex items-center">
-          <button onClick={() => setView("form")} className="bg-[#56a8c7] border border-black rounded-full px-8 py-2.5 flex items-center gap-2 font-bold text-sm shadow-sm hover:bg-[#4a97b5] transition-all"
+          <button onClick={() => setView("form")} className="bg-[#386097] border text-white rounded-full px-4 py-1.5 flex items-center gap-2 font-bold text-[10px] shadow-sm active:scale-95 transition-all hover:bg-white hover:text-black"
           >
-            <Plus size={20} /> Tambah Akun
+            <span className="text-base">+</span> Tambah Akun
           </button>
         </div>
       )}
@@ -200,21 +200,21 @@ const KelolaAkun = () => {
         onClick={() => !isExpanded && setExpandedTable("users")}
         className={`flex flex-col ${!isExpanded ? "cursor-pointer hover:scale-[1.002]" : "flex-1 overflow-auto"}`}
       >
-        <div className="overflow-hidden rounded-t-[25px] border-x border-t border-black bg-white shadow-2xl">
+        <div className="overflow-hidden rounded-t-[20px] border-x border-t border-black bg-white shadow-xl">
           <table className="w-full text-center border-collapse table-fixed">
-            <thead className="bg-[#56a8c7]">
+            <thead className="bg-[#386097]">
               <tr className="text-sm font-bold">
-                <th className="w-16 p-4 border-r border-b border-black">NO</th>
-                <th className="w-[30%] p-4 border-r border-b border-black">
+                <th className="w-12 p-3 border-r border-b text-white text-[11px] font-bold">NO</th>
+                <th className="p-3 border-r border-b text-white text-[11px] font-bold">
                   Nama & Email
                 </th>
-                <th className="w-[15%] p-4 border-r border-b border-black">
+                <th className="p-3 border-r border-b text-white text-[11px] font-bold">
                   Role / Unit
                 </th>
-                <th className="w-[25%] p-4 border-r border-b border-black">
+                <th className="p-3 border-r border-b text-white text-[11px] font-bold">
                   Dibuat Pada
                 </th>
-                <th className="p-4 border-b border-black">Aksi</th>
+                <th className="w-48 p-3 border-b text-white text-[11px] font-bold">Opsi</th>
               </tr>
             </thead>
             <tbody>
@@ -243,13 +243,13 @@ const KelolaAkun = () => {
                       <div className="flex justify-center gap-6">
                         <button
                           onClick={(e) => startEdit(user, e)}
-                          className="bg-[#56a8c7] border border-black rounded-md px-6 py-1.5 text-xs font-bold shadow-sm hover:bg-white"
+                          className="bg-[#386097] border text-white rounded-md px-5 py-1 text-[10px] font-bold shadow-sm  transition-all whitespace-nowrap hover:bg-white hover:text-black"
                         >
                           Edit
                         </button>
                         <button
                           onClick={(e) => handleDelete(user.id, e)}
-                          className="bg-[#56a8c7] border border-black rounded-md px-6 py-1.5 text-xs font-bold shadow-sm hover:bg-white"
+                          className="bg-[#386097] border text-white rounded-md px-5 py-1 text-[10px] font-bold shadow-sm  transition-all whitespace-nowrap hover:bg-white hover:text-black"
                         >
                           hapus
                         </button>

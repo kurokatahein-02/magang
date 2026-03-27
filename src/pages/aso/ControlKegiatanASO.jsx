@@ -325,7 +325,7 @@ const ControlKegiatanASO = () => {
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="p-2.5 rounded-full border border-black bg-white italic px-8 focus:outline-none shadow-sm text-xs tracking-widest"
+                className="p-2.5 rounded-full border border-black bg-white italic px-8 focus:outline-none shadow-sm text-xs font-bold tracking-widest"
               >
                 <option value="">Semua Bulan</option>
                 <option value="01">Januari</option>
@@ -345,7 +345,7 @@ const ControlKegiatanASO = () => {
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
-                className="p-2.5 rounded-full border border-black bg-white italic px-8 focus:outline-none shadow-sm text-xs tracking-widest"
+                className="p-2.5 rounded-full border border-black bg-white italic px-8 focus:outline-none shadow-sm text-xs font-bold tracking-widest"
               >
                 {years.map((year) => (
                   <option key={year} value={year}>
@@ -358,14 +358,14 @@ const ControlKegiatanASO = () => {
             <div className="flex gap-3">
               <button
                 onClick={handleExportExcel}
-                className="bg-[#1a536e] text-white border border-black rounded-full px-6 py-2 flex items-center gap-2 font-bold text-[10px] shadow-sm hover:bg-black transition-all"
+                className="bg-[#51A0D2] text-white border border-black rounded-full px-6 py-2 flex items-center gap-2 font-bold text-[10px] shadow-sm hover:bg-black transition-all"
               >
                 <Download size={14} /> Download Excel
               </button>
 
               <button
                 onClick={() => setView("form")}
-                className="bg-[#56a8c7] border border-black rounded-full px-4 py-1.5 flex items-center gap-2 font-bold text-[9px] shadow-sm hover:bg-[#4a97b5] active:scale-95 transition-all"
+                className="bg-[#386097] border text-white rounded-full px-4 py-1.5 flex items-center gap-2 font-bold text-[9px] shadow-sm  active:scale-95 transition-all hover:bg-white hover:text-black"
               >
                 <span className="text-base">+</span> Tambah Kegiatan
               </button>
@@ -393,26 +393,26 @@ const ControlKegiatanASO = () => {
         className={`overflow-hidden rounded-[20px] border border-black bg-white shadow-xl transition-all ${!isExpanded ? "cursor-pointer hover:scale-[1.002]" : ""}`}
       >
         <table className="w-full text-center border-collapse table-fixed">
-          <thead className="bg-[#56a8c7] text-black">
+          <thead className="bg-[#386097] text-black">
             <tr>
-              <th className="w-12 p-3 border-r border-b border-black text-[11px] font-bold">
+              <th className="w-12 p-3 border-r border-b text-white text-[11px] font-bold">
                 NO
               </th>
-              <th className="p-3 border-r border-b border-black text-[11px] font-bold">
+              <th className="p-3 border-r border-b text-white text-[11px] font-bold">
                 Nama Kegiatan
               </th>
               {/* Kolom Nama Unit dihapus karena sudah pasti ASO */}
-              <th className="p-3 border-r border-b border-black text-[11px] font-bold">
+              <th className="p-3 border-r border-b text-white text-[11px] font-bold">
                 Tanggal Mulai
               </th>
-              <th className="p-3 border-r border-b border-black text-[11px] font-bold">
+              <th className="p-3 border-r border-b text-white text-[11px] font-bold">
                 Tanggal Berakhir
               </th>
-              <th className="w-24 p-3 border-r border-b border-black text-[11px] font-bold">
+              <th className="w-24 p-3 border-r border-b text-white text-[11px] font-bold">
                 Status
               </th>
-              <th className="w-48 p-3 border-b border-black text-[11px] font-bold">
-                Aksi
+              <th className="w-48 p-3 border-b text-white text-[11px] font-bold">
+                Opsi
               </th>
             </tr>
           </thead>
@@ -455,7 +455,7 @@ const ControlKegiatanASO = () => {
                         e.stopPropagation();
                         startEdit(item);
                       }}
-                      className="bg-[#56a8c7] border border-black rounded-md px-4 py-0.5 text-[9px] font-bold hover:bg-white transition-all"
+                      className="bg-[#386097] border text-white rounded-md px-4 py-0.5 text-[9px] font-bold  transition-all hover:bg-white hover:text-black"
                     >
                       Edit
                     </button>
@@ -464,7 +464,7 @@ const ControlKegiatanASO = () => {
                         e.stopPropagation();
                         handleDelete(item.id);
                       }}
-                      className="bg-[#56a8c7] border border-black rounded-md px-4 py-0.5 text-[9px] font-bold hover:bg-white transition-all"
+                      className="bg-[#386097] border text-white rounded-md px-4 py-0.5 text-[9px] font-bold  transition-all hover:bg-white hover:text-black"
                     >
                       Delete
                     </button>

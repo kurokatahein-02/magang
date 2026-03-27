@@ -157,7 +157,7 @@ const Dashboard = () => {
 
               <div className="overflow-auto border border-black rounded-xl">
                 <table className="w-full text-left border-collapse">
-                  <thead className="bg-[#56a8c7] text-white sticky top-0">
+                  <thead className="bg-[#386097] text-white sticky top-0">
                     <tr>
                       <th className="p-4 border-b border-black text-xs font-bold uppercase w-16 text-center">
                         No
@@ -279,14 +279,14 @@ const Dashboard = () => {
       {/* Penambahan Keterangan Tanggal/Periode Terkini */}
       <div className="flex justify-between items-center mb-2 px-2">
         <div className="flex items-center gap-2">
-          <LayoutDashboard size={24} className="text-[#56a8c7]" />
+          <LayoutDashboard size={24} className="text-[#386097]" />
           <h2 className="text-xl font-bold uppercase tracking-widest">
             Dashboard Overview
           </h2>
         </div>
 
         {/* Tampilan Periode dari Backend */}
-        <div className="bg-[#1a536e] text-white px-4 py-1.5 rounded-full flex items-center gap-1 shadow-sm border border-black">
+        <div className="bg-[#386097] text-white px-4 py-1.5 rounded-full flex items-center gap-1 shadow-sm border border-black">
           <Timer size={14} className="mr-1" />
           <span className="text-[10px] font-bold uppercase tracking-tighter mr-1">
             Periode:
@@ -401,7 +401,7 @@ const Dashboard = () => {
                       <div
                         key={i}
                         onClick={() => window.open(doc.file, "_blank")}
-                        className="bg-[#56a8c7] border border-black/20 p-3 rounded-xl flex items-center gap-4 text-white shadow-sm hover:scale-[1.01] transition-all cursor-pointer"
+                        className="bg-[#386097] border border-black/20 p-3 rounded-xl flex items-center gap-4 text-white shadow-sm hover:scale-[1.01] transition-all cursor-pointer"
                       >
                         <FileText size={18} fill="black" />
                         <span className="text-[9px] font-bold tracking-widest uppercase truncate">
@@ -435,7 +435,7 @@ const Dashboard = () => {
                     onClick={() => setFilePage(i + 1)}
                     className={`w-7 h-7 border border-black rounded text-[8px] font-bold transition-all ${
                       filePage === i + 1
-                        ? "bg-[#56a8c7] text-white"
+                        ? "bg-[#386097] text-white"
                         : "bg-white hover:bg-gray-50"
                     }`}
                   >

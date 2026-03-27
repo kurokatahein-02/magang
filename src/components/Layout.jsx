@@ -83,11 +83,11 @@ const Layout = ({ children }) => {
     menuItems = [
       { name: "DASHBOARD", path: "/dashboard", icon: LayoutDashboard },
       {
-        name: "CONTROL KEGIATAN",
+        name: "KEGIATAN",
         path: "/control-kegiatan",
         icon: LaptopMinimalCheck,
       },
-      { name: "MAP PERSEBARAN OLT", path: "/control-sitac", icon: MapPinned },
+      { name: "OLT", path: "/control-sitac", icon: MapPinned },
       { name: "INVENTORY", path: "/inventory", icon: Box },
     ];
   } else if (role === "osp") {
@@ -95,12 +95,12 @@ const Layout = ({ children }) => {
     menuItems = [
       { name: "DASHBOARD", path: "/dashboard", icon: LayoutDashboard },
       {
-        name: "CONTROL KEGIATAN",
+        name: "KEGIATAN",
         path: "/control-kegiatan",
         icon: LaptopMinimalCheck,
       },
       {
-        name: "CONTROL PIHAK KETIGA",
+        name: "PIHAK KETIGA",
         path: "/control-pihak-ketiga",
         icon: Users,
       },
@@ -209,111 +209,102 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div className="flex h-screen bg-[#e5e7eb] font-sans overflow-hidden relative">
+    <div className="flex h-screen font-sans overflow-hidden relative">
       {/* --- SIDEBAR --- */}
-      <div
-        className={`bg-[#56a8c7] flex flex-col border-r border-black transition-all duration-500 ease-in-out relative ${isSidebarOpen ? "w-1/5 opacity-100" : "w-0 opacity-0 invisible"}`}
-      >
-        {isSidebarOpen && (
-          <>
-            <div className="p-5 flex justify-center items-center">
-              <img
-                src={myLogo}
-                alt="Logo"
-                className="w-[65%] h-auto object-contain max-h-24 transition-all"
-              />
+        <div
+          className={`bg-[#386097] flex flex-col border-r border-black transition-all duration-500 ease-in-out relative ${isSidebarOpen ? "w-40 opacity-100" : "w-0 opacity-0 invisible"}`}
+        >
+          {isSidebarOpen && (
+            <>
+              {/* Logo Diperkecil paddingnya */}
+              <div className="p-4 flex justify-center items-center">
+                <img src={myLogo} alt="Logo" className="w-[70%] h-auto object-contain max-h-16 transition-all" />
+              </div>
+
+              <nav className="flex-1 px-3 py-2 space-y-2 overflow-hidden">
+                <div className="h-[2px] bg-white/30 w-full mb-4"></div>
+
+                {menuItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.path}
+                      onClick={() => navigate(item.path)}
+                      // Padding dan Font Diperkecil
+                      className={`w-full text-left p-2.5 rounded-lg text-[9px] font-bold transition-all border whitespace-nowrap select-none flex items-center gap-3 ${
+                        location.pathname === item.path
+                          ? "bg-[#76c7e6] text-white border-white shadow-md"
+                          : "text-white border-transparent hover:bg-[#4a97b5]"
+                      }`}
+                    >
+                      {Icon && <Icon size={16} strokeWidth={2.5} />}
+                      {item.name}
+                    </button>
+                  );
+                })}
+              </nav>
+
+              <div className="p-3 border-t border-white/30">
+                <button onClick={handleLogout} className="flex items-center gap-2 text-white font-bold text-[11px] whitespace-nowrap select-none hover:text-red-200 transition-colors">
+                  <span className="border border-white rounded px-1.5 py-0.5">←</span> LOG OUT
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* --- TOMBOL BOLA ANIMASI (Diperkecil & disesuaikan posisinya) --- */}
+        <div
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className={`absolute select-none top-1/2 -translate-y-1/2 z-[100] cursor-pointer transition-all duration-500 ease-in-out
+            ${isSidebarOpen ? "left-40 rotate-0" : "left-0 rotate-[360deg]"} -ml-5`}
+        >
+          <div className="w-10 h-10 bg-white rounded-full border border-[#1a536e] shadow-md flex items-center justify-center group hover:scale-110 active:scale-95 transition-transform">
+            <div className="grid grid-cols-2 gap-1 p-1.5">
+              <div className="w-1.5 h-1.5 bg-[#386097] rounded-full"></div>
+              <div className="w-1.5 h-1.5 bg-[#386097] rounded-full"></div>
+              <div className="w-1.5 h-1.5 bg-[#386097] rounded-full"></div>
+              <div className="w-1.5 h-1.5 bg-[#386097] rounded-full"></div>
             </div>
-
-            <nav className="flex-1 px-4 py-2 space-y-4 overflow-hidden">
-              <div className="h-[3px] bg-white/30 w-full mb-6"></div>
-
-              {menuItems.map((item) => {
-                // Ambil komponen icon dari item
-                const Icon = item.icon;
-
-                return (
-                  <button
-                    key={item.path}
-                    onClick={() => navigate(item.path)}
-                    // Tambahkan 'flex items-center gap-3' di className ini agar sejajar dengan teks
-                    className={`w-full text-left p-3 rounded-lg text-[11px] font-bold transition-all border whitespace-nowrap select-none flex items-center gap-3 ${
-                      location.pathname === item.path
-                        ? "bg-[#76c7e6] text-white border-white shadow-md"
-                        : "text-white border-transparent hover:bg-[#4a97b5]"
-                    }`}
-                  >
-                    {/* Render Icon di Samping Teks */}
-                    {Icon && <Icon size={18} strokeWidth={2.5} />}
-                    {item.name}
-                  </button>
-                );
-              })}
-            </nav>
-
-            <div className="p-4 border-t border-white/30">
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 text-white font-bold text-sm whitespace-nowrap select-none"
-              >
-                <span className="border-2 border-white rounded p-1">←</span> LOG OUT
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* --- TOMBOL BOLA ANIMASI --- */}
-      <div
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className={`absolute select-none top-1/2 -translate-y-1/2 z-[100] cursor-pointer transition-all duration-500 ease-in-out
-          ${isSidebarOpen ? "left-[20%] rotate-0" : "left-0 rotate-[360deg]"} -ml-6`}
-      >
-        <div className="w-12 h-12 bg-white rounded-full border-2 border-[#1a536e] shadow-lg flex items-center justify-center group hover:scale-110 active:scale-95 transition-transform">
-          <div className="grid grid-cols-2 gap-1 p-2">
-            <div className="w-2 h-2 bg-[#56a8c7] rounded-full"></div>
-            <div className="w-2 h-2 bg-[#56a8c7] rounded-full"></div>
-            <div className="w-2 h-2 bg-[#56a8c7] rounded-full"></div>
-            <div className="w-2 h-2 bg-[#56a8c7] rounded-full"></div>
           </div>
         </div>
-      </div>
 
-      {/* --- MAIN CONTAINER --- */}
-      <div className="flex-1 flex flex-col min-w-0 transition-all duration-500">
-        <header className="h-20 bg-[#56a8c7] flex justify-between items-center px-8 border-b border-black text-white shrink-0">
-          <div className="flex items-center gap-8">
-            <div className="w-[2px] h-12 bg-white/50"></div>
-            <h2 className="text-3xl font-black tracking-[0.2em] text-[#dc2626] uppercase select-none">
-              {currentTitle}
-            </h2>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col text-right select-none">
-              <span className="text-black font-bold text-lg uppercase tracking-tight leading-tight">
-                {roleLabel}
-              </span>
-              <span className="text-white text-xs font-medium mt-0.5">
-                {userData?.name || "Username"}
-              </span>
+        {/* --- MAIN CONTAINER --- */}
+        <div className="flex-1 flex flex-col min-w-0 transition-all duration-500">
+          
+          {/* HEADER DIPERKECIL (h-14, font lebih kecil) */}
+          <header className="h-14 bg-[#386097] flex justify-between items-center px-6 border-b border-black text-white shrink-0">
+            <div className="flex items-center gap-5">
+              <div className="w-[2px] h-8 bg-white/50"></div>
+              <h2 className="text-xl font-black tracking-[0.2em] text-[#dc2626] uppercase select-none">
+                {currentTitle}
+              </h2>
             </div>
 
-            <div className="shrink-0 w-14 h-14 bg-white rounded-full border border-black shadow-inner overflow-hidden">
-              <img
-                src={myLogo}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
-        </header>
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col text-right select-none">
+                <span className="text-black font-bold text-sm uppercase tracking-tight leading-none">
+                  {roleLabel}
+                </span>
+                <span className="text-white text-[10px] font-medium mt-0.5">
+                  {userData?.name || "Username"}
+                </span>
+              </div>
 
-        {/* 4. TAMPILKAN HASIL RENDER PAGE CONTENT DI SINI */}
-        <main className="flex-1 overflow-auto p-8 relative bg-[#f1f5f9]">
-          {renderPageContent()}
-          <Outlet /> {/* Outlet untuk nested routes jika diperlukan */}
-        </main>
-      </div>
+              {/* Profile image diperkecil (w-10 h-10) */}
+              <div className="shrink-0 w-10 h-10 bg-white rounded-full border border-black shadow-inner overflow-hidden">
+                <img src={myLogo} alt="Profile" className="w-full h-full object-cover" />
+              </div>
+            </div>
+          </header>
+
+          {/* MAIN CONTENT AREA DIPERKECIL PADDINGNYA (p-5) */}
+          <main className="flex-1 overflow-auto p-5 relative bg-[#f1f5f9]">
+            {renderPageContent()}
+            <Outlet /> 
+          </main>
+
+        </div>
     </div>
   );
 };

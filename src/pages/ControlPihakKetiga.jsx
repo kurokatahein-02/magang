@@ -592,7 +592,7 @@ const ControlPihakKetiga = () => {
               {!isReadOnly && (
                 <button
                   onClick={() => setView("form")}
-                  className="bg-[#56a8c7] border border-black rounded-full px-6 py-2 flex items-center gap-2 font-bold text-xs shadow-sm hover:bg-[#4a97b5] transition-all"
+                  className="bg-[#386097] border text-white rounded-full px-6 py-2 flex items-center gap-2 font-bold text-xs shadow-sm transition-all hover:bg-white hover:text-black"
                 >
                   <Plus size={18} /> Tambah Pihak Ke Tiga
                 </button>
@@ -607,30 +607,32 @@ const ControlPihakKetiga = () => {
             >
               <div className="overflow-hidden rounded-t-[20px] border-x border-t border-black bg-white shadow-xl">
                 <table className="w-full text-center border-collapse table-fixed">
-                  <thead className="bg-[#56a8c7]">
+                  <thead className="bg-[#386097]">
                     <tr className="text-[11px] font-bold">
-                      <th className="w-12 p-3 border-r border-b border-black text-[11px] font-bold">
+                      <th className="w-12 p-3 border-r border-b text-white text-[11px] font-bold">
                         NO
                       </th>
-                      <th className="p-3 border-r border-b border-black text-[11px] font-bold">
+                      <th className="p-3 border-r border-b text-white text-[11px] font-bold">
                         Nama Vendor
                       </th>
-                      <th className="p-3 border-r border-b border-black text-[11px] font-bold">
+                      <th className="p-3 border-r border-b text-white text-[11px] font-bold">
                         Lokasi
                       </th>
-                      <th className="p-3 border-r border-b border-black text-[11px] font-bold">
+                      <th className="p-3 border-r border-b text-white text-[11px] font-bold">
                         Tanggal Mulai
                       </th>
-                      <th className="p-3 border-r border-b border-black text-[11px] font-bold">
+                      <th className="p-3 border-r border-b text-white text-[11px] font-bold">
                         Tanggal Berakhir
                       </th>
-                      <th className="p-3 border-r border-b border-black text-[11px] font-bold">
+                      <th className="p-3 border-r border-b text-white text-[11px] font-bold">
                         Dokumen
                       </th>
-                      <th className="w-24 p-3 border-r border-b border-black text-[11px] font-bold">
+                      <th className="w-24 p-3 border-r border-b text-white text-[11px] font-bold">
                         Status
                       </th>
-                      <th className="w-48 p-3 border-b border-black text-[11px] font-bold"></th>
+                      <th className="w-48 p-3 border-b text-white text-[11px] font-bold">
+                        Opsi
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -658,13 +660,13 @@ const ControlPihakKetiga = () => {
                           <div className="flex justify-center gap-2">
                             <button
                               onClick={(e) => openDocViewer(v, e)}
-                              className="p-1.5 bg-[#56a8c7] border border-black rounded hover:bg-white transition-all"
+                              className="p-1.5 bg-[#386097] border text-white rounded transition-all hover:bg-white hover:text-black"
                             >
                               <Eye size={14} />
                             </button>
                             <button
                               onClick={(e) => handleDownload(v, e)}
-                              className="p-1.5 bg-[#56a8c7] border border-black rounded hover:bg-white transition-all"
+                              className="p-1.5 bg-[#386097] border text-white rounded transition-all hover:bg-white hover:text-black"
                             >
                               <Download size={14} />
                             </button>
@@ -682,8 +684,8 @@ const ControlPihakKetiga = () => {
                             ${isSuperAdmin ? "cursor-pointer active:scale-90" : "cursor-default"}
                             ${
                               v.status === "Open"
-                                ? `bg-[#4ade80] ${isSuperAdmin ? "hover:bg-[#22c55e]" : ""}`
-                                : `bg-[#f87171] ${isSuperAdmin ? "hover:bg-[#ef4444]" : ""}`
+                                ? `bg-[#f87171] ${isSuperAdmin ? "hover:bg-[#ef4444]" : ""}`
+                                : `bg-[#4ade80] ${isSuperAdmin ? "hover:bg-[#22c55e]" : ""}`
                             }`}
                           >
                             {v.status}
@@ -691,21 +693,25 @@ const ControlPihakKetiga = () => {
                         </td>
                         <td className="px-4">
                           <div className="flex justify-center gap-3">
-                            {!isReadOnly && (
+                            {!isReadOnly ? (
                               <>
                                 <button
                                   onClick={(e) => startEdit(v, e)}
-                                  className="bg-[#56a8c7] border border-black rounded px-3 py-1 text-[10px] font-bold hover:bg-white transition-all"
+                                  className="bg-[#386097] border text-white rounded px-3 py-1 text-[10px] font-bold transition-all hover:bg-white hover:text-black"
                                 >
                                   Edit
                                 </button>
                                 <button
                                   onClick={(e) => handleDelete(v.id, e)}
-                                  className="bg-[#56a8c7] border border-black rounded px-3 py-1 text-[10px] font-bold hover:bg-white transition-all"
+                                  className="bg-[#386097] border text-white rounded px-3 py-1 text-[10px] font-bold transition-all hover:bg-white hover:text-black"
                                 >
                                   Delete
                                 </button>
                               </>
+                            ) : (
+                              <span className="text-[10px] italic text-gray-400">
+                                View Only
+                              </span>
                             )}
                           </div>
                         </td>

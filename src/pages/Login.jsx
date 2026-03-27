@@ -58,8 +58,8 @@ const Login = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-[#1a536e] flex items-center justify-center p-4 select-none">
-      <div className="bg-[#56a8c7] p-10 rounded-[40px] w-full max-w-md border-2 border-black shadow-2xl">
+    <div className="min-h-screen bg-[#386097] flex items-center justify-center p-4 select-none">
+      <div className="bg-[#437CB2] p-10 rounded-[40px] w-full max-w-md border-2 border-black shadow-2xl">
         {/* Logo TIF */}
         <div className="flex flex-col items-center mb-10">
           <div className="p-5 flex justify-center items-center">
@@ -131,7 +131,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-[#1a536e] text-white rounded-full font-black tracking-[0.3em] mt-8 hover:bg-[#144157] active:scale-95 transition-all shadow-lg border border-black/20 flex items-center justify-center gap-2"
+            className="w-full py-3 bg-[#274E84] border-black shadow-2xl text-white rounded-full font-black tracking-[0.3em] mt-8 hover:bg-[#144157] active:scale-95 transition-all shadow-lg border border-black/20 flex items-center justify-center gap-2"
           >
             {loading ? (
               <>

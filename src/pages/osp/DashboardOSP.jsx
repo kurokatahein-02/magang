@@ -101,14 +101,14 @@ const DashboardOSP = () => {
       {/* Penambahan Keterangan Tanggal/Periode Terkini */}
       <div className="flex justify-between items-center mb-2 px-2">
         <div className="flex items-center gap-2">
-          <LayoutDashboard size={24} className="text-[#56a8c7]" />
+          <LayoutDashboard size={24} className="text-[#386097]" />
           <h2 className="text-xl font-bold uppercase tracking-widest">
             Dashboard Overview
           </h2>
         </div>
 
         {/* Tampilan Periode dari Backend */}
-        <div className="bg-[#1a536e] text-white px-4 py-1.5 rounded-full flex items-center gap-1 shadow-sm border border-black">
+        <div className="bg-[#386097] text-white px-4 py-1.5 rounded-full flex items-center gap-1 shadow-sm border border-black">
           <Timer size={14} className="mr-1" />
           <span className="text-[10px] font-bold uppercase tracking-tighter mr-1">
             Periode:
