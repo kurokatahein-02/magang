@@ -16,6 +16,7 @@ import Dashboard from "../pages/Dashboard";
 import ControlKegiatanDefault from "../pages/ControlKegiatan";
 import ControlPihakKetigaDefault from "../pages/ControlPihakKetiga";
 import ControlSitacDefault from "../pages/ControlSitac";
+import MiniOltDefault from "../pages/MiniOlt";
 import InventoryDefault from "../pages/Inventory";
 import KelolaAkun from "../pages/KelolaAkun";
 
@@ -137,6 +138,7 @@ const Layout = ({ children }) => {
       { name: "KEGIATAN", path: "/control-kegiatan", icon: LaptopMinimalCheck },
       { name: "PIHAK KETIGA", path: "/control-pihak-ketiga", icon: Users },
       { name: "LAPORAN/SITAC", path: "/control-sitac", icon: MapPinned },
+      { name: "Mini-OLT", path: "/olt", icon: MapPinned },
       { name: "INVENTORY", path: "/inventory", icon: Box },
       { name: "KELOLA AKUN", path: "/kelola-akun", icon: Users },
     ];

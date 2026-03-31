@@ -236,39 +236,24 @@ const DashboardISP = () => {
                   m.longitude && (
                     <Marker key={m.id} position={[m.latitude, m.longitude]}>
                       <Popup>
-                        <div className="font-bold text-xs">
+                        <div className="font-bold text-xs uppercase">
                           {m.nama_perangkat}
                         </div>
-                        <div className="text-[10px]">{m.lokasi}</div>
-                      </Popup>
-
-                      {/* Label Permanen di atas Pin (Nama, Lokasi, Baterai) */}
-                      <Tooltip
-                        permanent
-                        direction="top"
-                        offset={[0, -5]}
-                        className="shadow-md border-black rounded p-1 bg-white"
-                      >
-                        <div className="flex flex-col items-center text-[7px] leading-tight">
-                          <span className="font-bold uppercase text-[#1a536e]">
-                            {m.nama_perangkat}
-                          </span>
-                          <span className="text-gray-600 italic">
-                            {m.lokasi}
-                          </span>
-                          <span
-                            className={`mt-0.5 px-1 rounded-full text-[6px] font-black text-white ${
-                              m.status_baterai === "Good"
-                                ? "bg-green-500"
-                                : m.status_baterai === "Average"
-                                  ? "bg-yellow-500"
-                                  : "bg-red-500"
-                            }`}
-                          >
-                            BATERAI: {m.status_baterai?.toUpperCase()}
-                          </span>
+                        <div className="text-[10px] leading-tight mb-1">
+                          {m.lokasi}
                         </div>
-                      </Tooltip>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[8px] font-bold text-white ${
+                            m.status_baterai === "Good"
+                              ? "bg-green-500"
+                              : m.status_baterai === "Average"
+                                ? "bg-yellow-500"
+                                : "bg-red-500"
+                          }`}
+                        >
+                          BATERAI: {m.status_baterai?.toUpperCase()}
+                        </span>
+                      </Popup>
                     </Marker>
                   ),
               )}

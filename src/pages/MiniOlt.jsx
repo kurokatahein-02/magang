@@ -7,7 +7,7 @@ import {
   Trash2,
   Edit,
 } from "lucide-react";
-import api from '../../api';
+import api from '../api';
 import {
   MapContainer,
   TileLayer,
@@ -57,7 +57,7 @@ const RecenterMap = ({ lat, lng }) => {
   return null;
 };
 
-const MapPersebaranOLT = () => {
+const MiniOlt = () => {
   const [view, setView] = useState("table");
   const [expandedView, setExpandedView] = useState(null);
   const [devices, setDevices] = useState([]);
@@ -594,4 +594,4 @@ const MapPersebaranOLT = () => {
   );
 };
 
-export default MapPersebaranOLT;
+export default MiniOlt;

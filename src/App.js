@@ -3,6 +3,9 @@ import Layout from './components/Layout';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute'; // Import komponen proteksi
 
+// Di dalam setup Routes Anda:
+
+
 function App() {
   return (
     <Router>
@@ -21,6 +24,7 @@ function App() {
             <Route path="/olt" element={<div/>} />
             <Route path="/inventory" element={<div />} />
             <Route path="/kelola-akun" element={<div />} />
+            <Route path="/mini-olt" element={<div />} />
           </Route>
         </Route>
 

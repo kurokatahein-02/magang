@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ChevronDown, MapPin, Download, Plus, ArrowRight } from "lucide-react";
 import api from "../api";
+import Swal from "sweetalert2";
 
 const API_URL = "http://127.0.0.1:8000/api/inventories";
 
@@ -11,6 +12,13 @@ const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showNotification, setShowNotification] = useState(false);
   const [inventoryList, setInventoryList] = useState([]);
+  const [historyList, setHistoryList] = useState([]);
+  const [takeFormData, setTakeFormData] = useState({
+    inventory_id: null,
+    name: "",
+    amountTaken: "",
+    unit: "",
+  });
   const [formData, setFormData] = useState({
     id: null,
     name: "",
@@ -31,6 +39,7 @@ const Inventory = () => {
       const response = await api.get("/inventories/export", {
         params: {
           // Sesuaikan dengan state filter yang Anda gunakan di Inventory.jsx
+          unit: activeFilter,
           search: searchTerm,
         },
         responseType: "blob", // Penting untuk menangani file binary
@@ -62,7 +71,40 @@ const Inventory = () => {
       link.parentNode.removeChild(link);
     } catch (error) {
       console.error("Gagal export inventory:", error);
-      alert("Gagal mengunduh laporan Inventori.");
+      Swal.fire({
+        icon: "error",
+        title: "Gagal",
+        text: "Gagal mengunduh laporan Inventori.",
+        confirmButtonColor: "#386097",
+      });
+    }
+  };
+
+  const handleExportHistory = async () => {
+    try {
+      const response = await api.get("/inventories/history/export", {
+        responseType: "blob",
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+
+      const today = new Date();
+      const formattedDate = today.toISOString().split("T")[0];
+      const fileName = `Histori_Pengambilan_${formattedDate}.xlsx`;
+
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      console.error("Gagal export histori:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Gagal",
+        text: "Gagal mengunduh histori pengambilan.",
+      });
     }
   };
 
@@ -92,6 +134,17 @@ const Inventory = () => {
     }
   };
 
+  const fetchHistory = async () => {
+    try {
+      const response = await api.get(`${API_URL}/history`);
+      setHistoryList(response.data.data);
+      setView("history");
+    } catch (error) {
+      console.error("Gagal mengambil histori:", error);
+      Swal.fire("Error", "Gagal memuat data histori", "error");
+    }
+  };
+
   useEffect(() => {
     fetchInventory();
   }, [activeFilter, searchTerm]);
@@ -108,7 +161,27 @@ const Inventory = () => {
     setView("edit");
   };
 
+  const startTake = (item, e) => {
+    e.stopPropagation();
+    setTakeFormData({
+      inventory_id: item.id,
+      name: item.name,
+      amountTaken: "",
+      unit: "",
+    });
+    setView("take");
+  };
+
   const handleSave = async () => {
+    if (!formData.name || !formData.amount || !formData.unit) {
+      return Swal.fire({
+        icon: "warning",
+        title: "Data Belum Lengkap",
+        text: "Silakan isi nama barang, jumlah, dan unit.",
+        confirmButtonColor: "#386097",
+      });
+    }
+
     try {
       const payload = {
         nama_barang: formData.name,
@@ -119,27 +192,85 @@ const Inventory = () => {
 
       if (view === "edit") {
         await api.put(`${API_URL}/${formData.id}`, payload);
+        Swal.fire({
+          icon: "success",
+          title: "Diperbarui!",
+          text: "Data inventori berhasil diubah.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
       } else {
         await api.post(API_URL, payload);
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: "Barang baru telah ditambahkan.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
       }
 
       fetchInventory();
       resetForm();
     } catch (error) {
       console.error("Gagal menyimpan data:", error);
-      alert("Terjadi kesalahan saat menyimpan data.");
+      Swal.fire("Error", "Gagal menyimpan data", "error");
+    }
+  };
+
+  const handleTakeSubmit = async () => {
+    if (!takeFormData.amountTaken || !takeFormData.unit) {
+      return Swal.fire({
+        icon: "warning",
+        title: "Data Belum Lengkap",
+        text: "Silakan isi jumlah yang diambil dan unit peminjam.",
+        confirmButtonColor: "#386097",
+      });
+    }
+
+    try {
+      await api.post(`${API_URL}/${takeFormData.inventory_id}/take`, {
+        jumlah: takeFormData.amountTaken,
+        unit: takeFormData.unit,
+      });
+
+      Swal.fire("Berhasil", "Barang telah berhasil diambil", "success");
+      fetchInventory();
+      resetForm();
+    } catch (error) {
+      console.error("Gagal mengambil barang:", error);
+      Swal.fire("Error", "Gagal memproses pengambilan barang", "error");
     }
   };
 
   const handleAction = async (e, type, id) => {
     e.stopPropagation();
     if (type === "delete") {
-      if (window.confirm("Hapus barang dari inventory?")) {
+      const result = await Swal.fire({
+        title: "Hapus Barang?",
+        text: "Data yang dihapus tidak dapat dikembalikan!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#386097",
+        confirmButtonText: "Ya, Hapus!",
+        cancelButtonText: "Batal",
+      });
+
+      if (result.isConfirmed) {
         try {
           await api.delete(`${API_URL}/${id}`);
+          Swal.fire({
+            icon: "success",
+            title: "Dihapus!",
+            text: "Barang telah berhasil dihapus.",
+            timer: 1500,
+            showConfirmButton: false,
+          });
           fetchInventory();
         } catch (error) {
           console.error("Gagal menghapus data:", error);
+          Swal.fire("Error", "Gagal menghapus data", "error");
         }
       }
     }
@@ -223,6 +354,140 @@ const Inventory = () => {
     );
   }
 
+  // --- VIEW: TAKE ITEM FORM ---
+  if (view === "take") {
+    return (
+      <div className="h-full flex flex-col items-center justify-center select-none animate-fadeIn">
+        <h3 className="mb-6 font-bold text-sm uppercase tracking-widest text-center">
+          AMBIL BARANG
+        </h3>
+        <div className="bg-[#f3f4f6] border border-black rounded-[40px] p-12 w-full max-w-2xl shadow-sm flex flex-col gap-6">
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase ml-2 text-gray-500">Nama Barang</label>
+              <input
+                value={takeFormData.name}
+                readOnly
+                className="w-full p-3 rounded-lg border border-black bg-gray-200 italic px-6 focus:outline-none cursor-not-allowed opacity-70"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase ml-2 text-gray-500">Jumlah yang diambil</label>
+              <input
+                type="number"
+                value={takeFormData.amountTaken}
+                onChange={(e) => setTakeFormData({ ...takeFormData, amountTaken: e.target.value })}
+                placeholder="Masukan Jumlah ...."
+                className="w-full p-3 rounded-lg border border-black bg-[#d9d9d9] italic px-6 focus:outline-none"
+              />
+            </div>
+
+            <div className="relative space-y-2">
+              <label className="text-[10px] font-bold uppercase ml-2 text-gray-500">Unit Pengambil</label>
+              <div className="relative">
+                <select
+                  value={takeFormData.unit}
+                  onChange={(e) => setTakeFormData({ ...takeFormData, unit: e.target.value })}
+                  className="w-full p-3 rounded-lg border border-black bg-[#d9d9d9] italic px-6 focus:outline-none appearance-none cursor-pointer"
+                >
+                  <option value="">Pilih Unit ....</option>
+                  <option value="OSP">OSP</option>
+                  <option value="ISP">ISP</option>
+                  <option value="ASO">ASO</option>
+                  <option value="HAI">HAI</option>
+                </select>
+                <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-center gap-10 mt-10 font-bold">
+            <button onClick={resetForm} className="px-16 py-3 bg-[#d9d9d9] border border-black rounded-lg hover:bg-white transition-all uppercase">
+              BATAL
+            </button>
+            <button onClick={handleTakeSubmit} className="px-16 py-3 bg-[#386097] text-white border border-black rounded-lg hover:bg-black transition-all uppercase">
+              AMBIL
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- VIEW: HISTORY TABLE ---
+  if (view === "history") {
+    return (
+      <div className="h-full flex flex-col gap-6 select-none relative p-4 animate-fadeIn">
+        <div className="relative flex items-center justify-center min-h-[40px]">
+          <button
+            onClick={() => setView("table")}
+            className="absolute left-0 bg-white border border-black rounded-full w-10 h-10 flex items-center justify-center shadow-md font-bold text-2xl hover:scale-110 transition-all"
+          >
+            ←
+          </button>
+          <h3 className="font-bold uppercase tracking-[0.2em] text-xl">
+            HISTORI PENGAMBILAN BARANG
+          </h3>
+          <button
+            onClick={handleExportHistory}
+            className="absolute right-0 bg-[#51A0D2] text-white border border-black rounded-full px-6 py-2 flex items-center gap-2 font-bold text-[10px] shadow-sm hover:bg-black transition-all"
+          >
+            <Download size={14} /> Export Histori
+          </button>
+        </div>
+
+        <div className="overflow-hidden rounded-[20px] border border-black bg-white shadow-xl flex-1 overflow-auto">
+          <table className="w-full text-center border-collapse table-fixed">
+            <thead className="bg-[#386097] sticky top-0 z-10">
+              <tr>
+                <th className="w-12 p-3 border-r border-b text-white text-[11px] font-bold">NO</th>
+                <th className="p-3 border-r border-b text-white text-[11px] font-bold">Nama Barang</th>
+                <th className="p-3 border-r border-b text-white text-[11px] font-bold">Jumlah</th>
+                <th className="p-3 border-r border-b text-white text-[11px] font-bold">Unit Pengambil</th>
+                <th className="p-3 border-b text-white text-[11px] font-bold">Tanggal Ambil</th>
+              </tr>
+            </thead>
+            <tbody>
+              {historyList.length > 0 ? (
+                historyList.map((item, index) => (
+                  <tr key={item.id} className="h-12 border-b border-black hover:bg-gray-50">
+                    <td className="border-r border-black font-bold text-xs">{index + 1}</td>
+                    <td className="border-r border-black text-xs px-2 text-left uppercase">{item.nama_barang}</td>
+                    <td className="border-r border-black text-xs">{item.jumlah}</td>
+                    <td className="border-r border-black text-xs font-bold uppercase">{item.unit}</td>
+                    <td className="text-xs">
+                      {new Date(item.created_at).toLocaleString("id-ID", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="p-10 text-center italic text-gray-400">
+                    Belum ada data histori.
+                  </td>
+                </tr>
+              )}
+              {/* Padding empty rows */}
+              {[...Array(Math.max(0, 15 - historyList.length))].map((_, i) => (
+                <tr key={`empty-hist-${i}`} className="h-12 border-b border-black opacity-20">
+                  <td className="border-r border-black"></td>
+                  <td className="border-r border-black"></td>
+                  <td className="border-r border-black"></td>
+                  <td className="border-r border-black"></td>
+                  <td></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
+
+
   // --- VIEW: MAIN TABLE ---
   return (
     <div
@@ -281,6 +546,14 @@ const Inventory = () => {
 
             {/* Group Tombol Aksi di Kanan */}
             <div className="flex gap-3">
+              {/* Tombol Histori */}
+              <button
+                onClick={fetchHistory}
+                className="bg-[#386097] text-white border border-black rounded-full px-6 py-2 flex items-center gap-2 font-bold text-[10px] shadow-sm hover:bg-black transition-all"
+              >
+                Lihat Histori
+              </button>
+
               {/* Tombol Download Excel Baru */}
               <button
                 onClick={handleExportExcel}
@@ -327,7 +600,7 @@ const Inventory = () => {
                 <th className="p-3 border-r border-b text-white text-[11px] font-bold">
                   Lokasi
                 </th>
-                <th className="w-48 p-3 border-b text-white text-[11px] font-bold">
+                <th className="w-72 p-3 border-b text-white text-[11px] font-bold">
                   Opsi
                 </th>
               </tr>
@@ -354,9 +627,15 @@ const Inventory = () => {
                     {item.location}
                   </td>
                   <td className="px-4">
-                    <div className="flex justify-center items-center gap-6">
+                    <div className="flex justify-center items-center gap-2">
                       {!isReadOnly ? (
                         <>
+                          <button
+                            onClick={(e) => startTake(item, e)}
+                            className="bg-[#386097] border text-white rounded-md px-5 py-1 text-[10px] font-bold shadow-sm transition-all whitespace-nowrap hover:bg-white hover:text-black"
+                          >
+                            Ambil
+                          </button>
                           <button
                             onClick={(e) => startEdit(item, e)}
                             className="bg-[#386097] border text-white rounded-md px-5 py-1 text-[10px] font-bold shadow-sm transition-all whitespace-nowrap hover:bg-white hover:text-black"
