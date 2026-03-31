@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Download } from 'lucide-react';
 import api from '../../api';
+import Swal from 'sweetalert2';
 
 const API_URL = 'http://127.0.0.1:8000/api/inventories';
 
@@ -98,41 +99,76 @@ const InventoryHAI = () => {
   };
 
   const handleSave = async () => {
-    if (!formData.name || !formData.amount) return alert("Nama barang dan jumlah wajib diisi!");
-
+    if (!formData.name || !formData.amount) 
+      return Swal.fire({
+        icon: 'warning',
+        title: 'Validasi Data',
+        text: 'Nama barang dan jumlah barang harus diisi!',
+        confirmButtonText: 'OK'
+      });
     try {
       const payload = {
         nama_barang: formData.name,
         jumlah_barang: formData.amount,
-        unit: 'HAI', // Paksa simpan sebagai HAI
+        unit: 'HAI', // Paksa simpan sebagai ASO
         lokasi: formData.location
       };
 
       if (view === 'edit') {
         await api.put(`${API_URL}/${formData.id}`, payload);
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil',
+          text: 'Data barang berhasil diperbarui',
+          confirmButtonText: 'OK'
+        });
       } else {
         await api.post(API_URL, payload);
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil',
+          text: 'Data barang berhasil ditambahkan',
+          confirmButtonText: 'OK'
+        });
       }
       
       fetchInventory();
       resetForm();
     } catch (error) {
       console.error("Gagal menyimpan data:", error);
-      alert("Terjadi kesalahan saat menyimpan data.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal Simpan',
+        text: 'Terjadi kesalahan saat menyimpan data.',
+        confirmButtonText: 'OK'
+      });
     }
   };
 
   const handleAction = async (e, type, id) => {
     e.stopPropagation();
     if (type === 'delete') {
-      if (window.confirm("Hapus barang dari inventory?")) {
-        try {
-          await api.delete(`${API_URL}/${id}`);
-          fetchInventory();
-        } catch (error) {
-          console.error("Gagal menghapus data:", error);
+      Swal.fire({
+        title: 'Hapus Barang?',
+        text: 'Barang akan dihapus dari inventory',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Hapus',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6b7280'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            await api.delete(`${API_URL}/${id}`);
+            fetchInventory();
+            Swal.fire('Terhapus!', 'Barang berhasil dihapus', 'success');
+          } catch (error) {
+            console.error("Gagal menghapus data:", error);
+            Swal.fire('Gagal', 'Terjadi kesalahan saat menghapus barang', 'error');
+          }
         }
-      }
+      });
     }
   };
 

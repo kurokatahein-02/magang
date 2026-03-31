@@ -101,7 +101,7 @@ const DashboardOSP = () => {
       {/* Penambahan Keterangan Tanggal/Periode Terkini */}
       <div className="flex justify-between items-center mb-2 px-2">
         <div className="flex items-center gap-2">
-          <LayoutDashboard size={24} className="text-[#386097]" />
+          <LayoutDashboard size={24} className="text-[#56a8c7]" />
           <h2 className="text-xl font-bold uppercase tracking-widest">
             Dashboard Overview
           </h2>

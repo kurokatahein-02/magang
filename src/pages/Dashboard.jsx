@@ -465,7 +465,7 @@ const Dashboard = () => {
               />
               {/* Alert Kegiatan Baru (Pengganti Pihak Ketiga) */}
               <AlertBox
-                title="Alert Kegiatan Belum Close"
+                title="Alert Kegiatan Open"
                 count={data?.alerts?.kegiatan?.length || 0}
                 msg="BELUM DISELESAIKAN DARI BULAN LALU"
                 onClick={() => setExpanded("detail-alert-kegiatan")}

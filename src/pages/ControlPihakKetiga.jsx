@@ -9,7 +9,7 @@ import {
   ChevronDown,
   Plus,
 } from "lucide-react";
-import api from '../api';
+import api from "../api";
 import {
   MapContainer,
   TileLayer,
@@ -24,6 +24,7 @@ import L from "leaflet";
 
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import Swal from "sweetalert2";
 
 let DefaultIcon = L.icon({
   iconUrl: markerIcon,
@@ -151,22 +152,34 @@ const ControlPihakKetiga = () => {
     }
   };
 
-  const toggleStatus = async (id, e) => {
-    if (e && e.stopPropagation) e.stopPropagation();
+  const toggleStatus = async (id) => {
+    const result = await Swal.fire({
+      title: "Ubah Status?",
+      text: "Status kegiatan akan berganti (Open/Close)",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#386097",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya, Ubah!",
+      cancelButtonText: "Batal",
+    });
 
-    // TAMBAHKAN VALIDASI KONFIRMASI (Open <-> Close)
-    if (!window.confirm("Apakah anda ingin mengubah status?")) return;
-
-    try {
-      const response = await api.patch(`${API_URL}/${id}/status`);
-      if (response.data && response.data.success) {
-        // Refresh data agar tanggal berakhir muncul/hilang otomatis
-        await fetchVendors();
-        console.log("Update Berhasil:", response.data.data.status);
+    if (result.isConfirmed) {
+      try {
+        const response = await api.patch(`${API_URL}/${id}/status`);
+        if (response.data.success) {
+          Swal.fire({
+            icon: "success",
+            title: "Berhasil",
+            text: "Status telah diperbarui",
+            timer: 1000,
+            showConfirmButton: false,
+          });
+          fetchVendors();
+        }
+      } catch (error) {
+        Swal.fire("Error", "Gagal mengubah status", "error");
       }
-    } catch (error) {
-      console.error("Gagal mengubah status:", error);
-      alert("Terjadi kesalahan sistem saat memperbarui status.");
     }
   };
 
@@ -195,12 +208,22 @@ const ControlPihakKetiga = () => {
   const handleSave = async () => {
     // 1. Validasi Input Dasar
     if (!formData.name || !formData.location || !formData.startDate) {
-      return alert("Mohon lengkapi Nama Vendor, Lokasi, dan Tanggal Mulai!");
+      return Swal.fire({
+        icon: "warning",
+        title: "Data Belum Lengkap",
+        text: "Silakan isi nama vendor, lokasi, dan tanggal mulai.",
+        confirmButtonColor: "#386097",
+      });
     }
 
     // 2. Validasi File (Wajib jika Tambah Data Baru)
     if (view !== "edit" && !selectedFile) {
-      return alert("Wajib melampirkan dokumen PDF untuk data baru!");
+      return Swal.fire({
+        icon: "warning",
+        title: "File Belum Dilampirkan",
+        text: "Wajib melampirkan dokumen PDF untuk data baru!",
+        confirmButtonColor: "#386097",
+      });
     }
 
     // 3. Gunakan FormData karena ada pengiriman file (Multipart)
@@ -241,7 +264,13 @@ const ControlPihakKetiga = () => {
       // 4. Refresh data tabel dan kembali ke tampilan awal
       fetchVendors();
       resetForm();
-      alert("Data berhasil disimpan!");
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Pihak ketiga telah ditambahkan.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     } catch (error) {
       console.error("Gagal menyimpan data:", error);
 
@@ -268,14 +297,25 @@ const ControlPihakKetiga = () => {
     setSelectedFile(null);
   };
 
-  const handleDelete = async (id, e) => {
-    e.stopPropagation();
-    if (window.confirm("Hapus data vendor ini?")) {
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "Hapus Data?",
+      text: "Data yang dihapus tidak dapat dikembalikan!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#386097",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
       try {
         await api.delete(`${API_URL}/${id}`);
+        Swal.fire("Dihapus!", "Data telah berhasil dihapus.", "success");
         fetchVendors();
       } catch (error) {
-        alert("Gagal menghapus data");
+        Swal.fire("Error", "Gagal menghapus data", "error");
       }
     }
   };

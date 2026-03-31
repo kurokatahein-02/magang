@@ -22,7 +22,7 @@ import L from "leaflet";
 
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-
+import Swal from "sweetalert2";
 let DefaultIcon = L.icon({
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
@@ -120,7 +120,12 @@ const MapPersebaranOLT = () => {
 
   const handleSave = async () => {
     if (!formData.name || !formData.location || !formData.lat) {
-      return alert("Mohon lengkapi Nama Perangkat, Lokasi, dan Koordinat!");
+      return Swal.fire({
+        icon: "warning",
+        title: "Data Tidak Lengkap",
+        text: "Mohon lengkapi Nama Perangkat, Lokasi, dan Koordinat!",
+        confirmButtonText: "OK",
+      });
     }
 
     const payload = {
@@ -133,16 +138,26 @@ const MapPersebaranOLT = () => {
 
     try {
       if (view === "edit") {
-        await api.put(`${API_URL}/${formData.id}`, payload);
+      await api.put(`${API_URL}/${formData.id}`, payload);
       } else {
-        await api.post(API_URL, payload);
+      await api.post(API_URL, payload);
       }
       fetchDevices();
       resetForm();
-      alert("Data OLT berhasil disimpan!");
+      Swal.fire({
+      icon: "success",
+      title: "Berhasil",
+      text: "Data OLT berhasil disimpan!",
+      confirmButtonText: "OK",
+      });
     } catch (error) {
       console.error("Gagal menyimpan data:", error);
-      alert("Terjadi kesalahan saat menyimpan data.");
+      Swal.fire({
+      icon: "error",
+      title: "Gagal",
+      text: "Terjadi kesalahan saat menyimpan data.",
+      confirmButtonText: "OK",
+      });
     }
   };
 
@@ -161,12 +176,35 @@ const MapPersebaranOLT = () => {
 
   const handleDelete = async (id, e) => {
     e.stopPropagation();
-    if (window.confirm("Hapus data perangkat OLT ini?")) {
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Hapus Data",
+      text: "Apakah Anda yakin ingin menghapus data perangkat OLT ini?",
+      showCancelButton: true,
+      confirmButtonText: "Hapus",
+      cancelButtonText: "Batal",
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#386097",
+    
+    });
+
+    if (result.isConfirmed) {
       try {
         await api.delete(`${API_URL}/${id}`);
         fetchDevices();
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil",
+          text: "Data OLT berhasil dihapus!",
+          confirmButtonText: "OK",
+        });
       } catch (error) {
-        alert("Gagal menghapus data");
+        Swal.fire({
+          icon: "error",
+          title: "Gagal",
+          text: "Terjadi kesalahan saat menghapus data.",
+          confirmButtonText: "OK",
+        });
       }
     }
   };
@@ -215,11 +253,18 @@ const MapPersebaranOLT = () => {
 
   const updateBatteryStatus = async (id, newStatus) => {
     // 1. Validasi Konfirmasi
-    const confirmChange = window.confirm(
-      `Apakah Anda yakin ingin mengubah status baterai menjadi ${newStatus.toUpperCase()}?`,
-    );
+    const result = await Swal.fire({
+      icon: "question",
+      title: "Ubah Status Baterai",
+      text: `Apakah Anda yakin ingin mengubah status baterai menjadi ${newStatus.toUpperCase()}?`,
+      showCancelButton: true,
+      confirmButtonText: "Ubah",
+      cancelButtonText: "Batal",
+      confirmButtonColor: "#386097",
+      cancelButtonColor: "#d9d9d9",
+    });
 
-    if (!confirmChange) return;
+    if (!result.isConfirmed) return;
 
     try {
       const response = await api.patch(`${API_URL}/${id}/status-battery`, {
@@ -229,11 +274,22 @@ const MapPersebaranOLT = () => {
       if (response.data.success) {
         // 2. Refresh data tabel
         fetchDevices();
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil",
+          text: "Status baterai berhasil diperbarui!",
+          confirmButtonText: "OK",
+        });
         console.log("Status baterai diperbarui ke:", newStatus);
       }
     } catch (error) {
       console.error("Gagal memperbarui status baterai:", error);
-      alert("Terjadi kesalahan saat memperbarui status baterai.");
+      Swal.fire({
+        icon: "error",
+        title: "Gagal",
+        text: "Terjadi kesalahan saat memperbarui status baterai.",
+        confirmButtonText: "OK",
+      });
     }
   };
 

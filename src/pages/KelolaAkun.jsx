@@ -251,7 +251,7 @@ const KelolaAkun = () => {
                           onClick={(e) => handleDelete(user.id, e)}
                           className="bg-[#386097] border text-white rounded-md px-5 py-1 text-[10px] font-bold shadow-sm  transition-all whitespace-nowrap hover:bg-white hover:text-black"
                         >
-                          hapus
+                          Delete
                         </button>
                       </div>
                     ) : (

@@ -23,6 +23,7 @@ import L from "leaflet";
 
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import Swal from "sweetalert2";
 
 let DefaultIcon = L.icon({
   iconUrl: markerIcon,
@@ -153,19 +154,36 @@ const ControlSitacHAI = () => {
     if (e && e.stopPropagation) e.stopPropagation();
 
     // TAMBAHKAN VALIDASI KONFIRMASI (Open <-> Close)
-    if (!window.confirm("Apakah anda ingin mengubah status?")) return;
-
-    try {
-      const response = await api.patch(`${API_URL}/${id}/status`);
-      if (response.data && response.data.success) {
-        // Sangat Penting: Panggil fetchVendors() agar data terbaru ditarik
-        await fetchVendors();
-        console.log("Update Berhasil:", response.data.data.status);
+    Swal.fire({
+      icon: "question",
+      title: "Ubah Status?",
+      text: "Apakah anda ingin mengubah status?",
+      showCancelButton: true,
+      confirmButtonColor: "#386097",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya",
+      cancelButtonText: "Batal",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await api.patch(`${API_URL}/${id}/status`);
+          if (response.data && response.data.success) {
+            // Sangat Penting: Panggil fetchVendors() agar data terbaru ditarik
+            await fetchVendors();
+            console.log("Update Berhasil:", response.data.data.status);
+          }
+        } catch (error) {
+          console.error("Gagal mengubah status:", error);
+          Swal.fire({
+            icon: "error",
+            title: "Gagal",
+            text: "Terjadi kesalahan sistem saat memperbarui status.",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#386097",
+          });
+        }
       }
-    } catch (error) {
-      console.error("Gagal mengubah status:", error);
-      alert("Terjadi kesalahan sistem saat memperbarui status.");
-    }
+    });
   };
 
   const openDocViewer = (item, e) => {
@@ -193,12 +211,24 @@ const ControlSitacHAI = () => {
   const handleSave = async () => {
     // 1. Validasi Input Dasar
     if (!formData.name || !formData.location || !formData.startDate) {
-      return alert("Mohon lengkapi Nama Vendor, Lokasi, dan Tanggal Mulai!");
+      return Swal.fire({
+        icon: "warning",
+        title: "Data Tidak Lengkap",
+        text: "Mohon lengkapi Nama Vendor, Lokasi, dan Tanggal Mulai!",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#386097",
+      });
     }
 
     // 2. Validasi File (Wajib jika Tambah Data Baru)
     if (view !== "edit" && !selectedFile) {
-      return alert("Wajib melampirkan dokumen PDF untuk data baru!");
+    return Swal.fire({
+      icon: "warning",
+      title: "Dokumen Diperlukan",
+      text: "Wajib melampirkan dokumen PDF untuk data baru!",
+      confirmButtonText: "OK",
+      confirmButtonColor: "#386097",
+    });
     }
 
     // 3. Gunakan FormData karena ada pengiriman file (Multipart)
@@ -239,7 +269,13 @@ const ControlSitacHAI = () => {
       // 4. Refresh data tabel dan kembali ke tampilan awal
       fetchVendors();
       resetForm();
-      alert("Data berhasil disimpan!");
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil",
+        text: "Data berhasil disimpan!",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#386097",
+      });
     } catch (error) {
       console.error("Gagal menyimpan data:", error);
 
@@ -268,14 +304,38 @@ const ControlSitacHAI = () => {
 
   const handleDelete = async (id, e) => {
     e.stopPropagation();
-    if (window.confirm("Hapus data vendor ini?")) {
-      try {
-        await api.delete(`${API_URL}/${id}`);
-        fetchVendors();
-      } catch (error) {
-        alert("Gagal menghapus data");
+    Swal.fire({
+      icon: "warning",
+      title: "Hapus Data?",
+      text: "Data vendor ini akan dihapus secara permanen!",
+      showCancelButton: true,
+      confirmButtonColor: "#386097",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Hapus",
+      cancelButtonText: "Batal",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await api.delete(`${API_URL}/${id}`);
+          fetchVendors();
+          Swal.fire({
+            icon: "success",
+            title: "Berhasil",
+            text: "Data berhasil dihapus!",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#386097",
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: "error",
+            title: "Gagal",
+            text: "Gagal menghapus data",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#386097",
+          });
+        }
       }
-    }
+    });
   };
 
   // Fungsi ini hanya sekadar mengupdate text input

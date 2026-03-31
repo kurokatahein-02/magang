@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { CalendarDays, ChevronDown, Download } from "lucide-react";
-import api from '../../api';
+import api from "../../api";
+import Swal from "sweetalert2";
 
 // Konfigurasi Base URL Laravel
 const API_URL = "http://127.0.0.1:8000/api/activities";
@@ -138,7 +139,12 @@ const ControlKegiatanOSP = () => {
   // Simpan Data Baru (Otomatis OSP)
   const handleSaveNew = async () => {
     if (!formData.name || !formData.startDate)
-      return alert("Isi data terlebih dahulu!");
+      return Swal.fire({
+        icon: "warning",
+        title: "Data Belum Lengkap",
+        text: "Silakan isi nama kegiatan dan tanggal mulai.",
+        confirmButtonColor: "#386097",
+      });
 
     try {
       await api.post(API_URL, {
@@ -147,10 +153,19 @@ const ControlKegiatanOSP = () => {
         tanggal_mulai: formData.startDate,
         status: "Open",
       });
+
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Kegiatan baru telah ditambahkan.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+
       fetchActivities();
       resetForm();
     } catch (error) {
-      alert("Gagal menyimpan data");
+      Swal.fire("Error", "Gagal menyimpan data", "error");
     }
   };
 
@@ -167,40 +182,71 @@ const ControlKegiatanOSP = () => {
       };
 
       await api.put(`${API_URL}/${formData.id}`, payload);
+      Swal.fire({
+        icon: "success",
+        title: "Diperbarui!",
+        text: "Data kegiatan berhasil diubah.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
       fetchActivities();
       resetForm();
     } catch (error) {
-      alert("Gagal memperbarui data");
+      Swal.fire("Error", "Gagal memperbarui data", "error");
     }
   };
 
   // Ubah Status Langsung
   const toggleStatus = async (id) => {
-    // Konfirmasi akan muncul untuk semua arah perubahan status
-    const confirmChange = window.confirm("Apakah anda ingin mengubah status?");
+    const result = await Swal.fire({
+      title: "Ubah Status?",
+      text: "Status kegiatan akan berganti (Open/Close)",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#386097",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya, Ubah!",
+      cancelButtonText: "Batal",
+    });
 
-    if (!confirmChange) return; // Jika pilih "Tidak", proses dibatalkan
-
-    try {
-      const response = await api.patch(`${API_URL}/${id}/status`);
-
-      if (response.data.success) {
-        fetchActivities();
-        console.log("Status berhasil diperbarui");
+    if (result.isConfirmed) {
+      try {
+        const response = await api.patch(`${API_URL}/${id}/status`);
+        if (response.data.success) {
+          Swal.fire({
+            icon: "success",
+            title: "Berhasil",
+            text: "Status telah diperbarui",
+            timer: 1000,
+            showConfirmButton: false,
+          });
+          fetchActivities();
+        }
+      } catch (error) {
+        Swal.fire("Error", "Gagal mengubah status", "error");
       }
-    } catch (error) {
-      console.error("Gagal mengubah status:", error);
-      alert("Terjadi kesalahan saat memperbarui status.");
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Hapus data ini?")) {
+    const result = await Swal.fire({
+      title: "Hapus Data?",
+      text: "Data yang dihapus tidak dapat dikembalikan!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#386097",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
       try {
         await api.delete(`${API_URL}/${id}`);
+        Swal.fire("Dihapus!", "Data telah berhasil dihapus.", "success");
         fetchActivities();
       } catch (error) {
-        alert("Gagal menghapus data");
+        Swal.fire("Error", "Gagal menghapus data", "error");
       }
     }
   };

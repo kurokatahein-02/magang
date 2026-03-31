@@ -1,0 +1,113 @@
+const handleSaveNew = async () => {
+    if (!formData.name || !formData.startDate)
+      return Swal.fire({
+        icon: "warning",
+        title: "Data Belum Lengkap",
+        text: "Silakan isi nama kegiatan dan tanggal mulai.",
+        confirmButtonColor: "#386097",
+      });
+
+    try {
+      await api.post(API_URL, {
+        nama_kegiatan: formData.name,
+        unit: "osp", // Pastikan tersimpan sebagai OSP
+        tanggal_mulai: formData.startDate,
+        status: "Open",
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Kegiatan baru telah ditambahkan.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+
+      fetchActivities();
+      resetForm();
+    } catch (error) {
+      Swal.fire("Error", "Gagal menyimpan data", "error");
+    }
+  };
+
+  // Update Data (Edit)
+  const handleUpdate = async () => {
+    try {
+      const payload = {
+        nama_kegiatan: formData.name,
+        unit: "osp", // Pastikan tersimpan sebagai OSP
+        tanggal_mulai: formData.startDate,
+        status: formData.status,
+        tanggal_berakhir:
+          formData.status === "Close" ? getRealtimeDate() : null,
+      };
+
+      await api.put(`${API_URL}/${formData.id}`, payload);
+      Swal.fire({
+        icon: "success",
+        title: "Diperbarui!",
+        text: "Data kegiatan berhasil diubah.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      fetchActivities();
+      resetForm();
+    } catch (error) {
+      Swal.fire("Error", "Gagal memperbarui data", "error");
+    }
+  };
+
+  // Ubah Status Langsung
+  const toggleStatus = async (id) => {
+    const result = await Swal.fire({
+      title: "Ubah Status?",
+      text: "Status kegiatan akan berganti (Open/Close)",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#386097",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya, Ubah!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await api.patch(`${API_URL}/${id}/status`);
+        if (response.data.success) {
+          Swal.fire({
+            icon: "success",
+            title: "Berhasil",
+            text: "Status telah diperbarui",
+            timer: 1000,
+            showConfirmButton: false,
+          });
+          fetchActivities();
+        }
+      } catch (error) {
+        Swal.fire("Error", "Gagal mengubah status", "error");
+      }
+    }
+  };
+
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "Hapus Data?",
+      text: "Data yang dihapus tidak dapat dikembalikan!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#386097",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`${API_URL}/${id}`);
+        Swal.fire("Dihapus!", "Data telah berhasil dihapus.", "success");
+        fetchActivities();
+      } catch (error) {
+        Swal.fire("Error", "Gagal menghapus data", "error");
+      }
+    }
+  };

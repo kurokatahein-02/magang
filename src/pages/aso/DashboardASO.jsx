@@ -163,22 +163,22 @@ const DashboardASO = () => {
           title="Open"
           value={`${ASOStats.open_count}`}
           icon={DoorOpen}
-          color="bg-red-500"
-          iconColor="text-white"
+          color="bg-red-100"
+          iconColor="text-red-500"
         />
         <StatCard
           title="Close"
           value={`${ASOStats.close_count}`}
           icon={DoorClosed}
-          color="bg-green-500"
-          iconColor="text-white"
+          color="bg-green-100"
+          iconColor="text-green-500"
         />
         <StatCard
           title="Progres"
           value={`${progressASO}%`}
           icon={Timer}
-          color="bg-orange-400"
-          iconColor="text-white"
+          color="bg-orange-100"
+          iconColor="text-orange-500"
         />
       </div>
 
