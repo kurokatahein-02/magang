@@ -244,6 +244,9 @@ const Dashboard = () => {
                           <div className="text-[10px] leading-tight">
                             {m.lokasi}
                           </div>
+                          <div className="text-gray-400 font-mono">
+                            Lat&Long: {m.latitude}, {m.longitude}
+                          </div>
                         </Popup>
                         <Tooltip
                           permanent
@@ -255,12 +258,16 @@ const Dashboard = () => {
                             <span className="font-bold text-[10px] uppercase text-[#1a536e] border-b border-gray-200 mb-1 w-full pb-1">
                               {m.nama_vendor}
                             </span>
-                            <span className="text-[9px] text-gray-600 italic normal-case mb-1">
-                              {m.lokasi}
-                            </span>
-                            <span className="text-[8px] text-gray-400 font-mono bg-gray-50 px-1 rounded">
-                              {m.latitude}, {m.longitude}
-                            </span>
+                            {expanded === "lokasi-p3" && (
+                              <>
+                                <span className="text-gray-600 italic">
+                                  {m.lokasi}
+                                </span>
+                                <span className="text-gray-400 font-mono">
+                                  {m.latitude}, {m.longitude}
+                                </span>
+                              </>
+                            )}
                           </div>
                         </Tooltip>
                       </Marker>
@@ -458,14 +465,14 @@ const Dashboard = () => {
             <div className="flex flex-col gap-4">
               {/* Alert SITAC */}
               <AlertBox
-                title="Alert Laporan SITAC"
+                title="Notifikasi SITAC"
                 count={data?.alerts?.sitac?.length || 0}
                 msg="EXPIRING IN < 3 MONTHS"
                 onClick={() => setExpanded("detail-alert-sitac")}
               />
               {/* Alert Kegiatan Baru (Pengganti Pihak Ketiga) */}
               <AlertBox
-                title="Alert Kegiatan Open"
+                title="Notifikasi Kegiatan Open"
                 count={data?.alerts?.kegiatan?.length || 0}
                 msg="BELUM DISELESAIKAN DARI BULAN LALU"
                 onClick={() => setExpanded("detail-alert-kegiatan")}
@@ -473,16 +480,16 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* ROW 2: BIG MAP SITAC */}
-          {/* MINIMAP SITAC */}
+          {/* ROW 2: BIG p3 */}
+          {/* MINIMAP p3 */}
           <div
-            onClick={() => setExpanded("lokasi-sitac")}
+            onClick={() => setExpanded("lokasi-p3")}
             className="flex-1 min-h-[400px] bg-white border border-black rounded-[25px] p-6 cursor-pointer hover:shadow-xl transition-all group flex flex-col"
           >
             <div className="flex items-center gap-2 mb-4">
               <MapPin size={24} className="bg-black text-white p-1 rounded" />
               <div className="text-b font-bold uppercase tracking-widest">
-                Lokasi SITAC
+                Lokasi PIHAK KETIGA
               </div>
             </div>
             <div className="flex-1 rounded-2xl border border-black/5 relative overflow-hidden">
@@ -493,7 +500,7 @@ const Dashboard = () => {
                 style={{ height: "100%", width: "100%", zIndex: 0 }}
               >
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                {(data?.markers?.sitac || []).map(
+                {(data?.markers?.p3 || []).map(
                   (m) =>
                     m.latitude &&
                     m.longitude && (
@@ -523,7 +530,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* ROW 3: INVENTORY & LOKASI P3 */}
+          {/* ROW 3: INVENTORY & LOKASI sitac */}
           <div className="grid grid-cols-2 gap-6 h-[300px]">
             <div
               onClick={() => (window.location.href = "/inventory")}
@@ -545,13 +552,13 @@ const Dashboard = () => {
 
             {/* MINIMAP PIHAK KETIGA */}
             <div
-              onClick={() => setExpanded("lokasi-p3")}
+              onClick={() => setExpanded("lokasi-sitac")}
               className="bg-white border border-black rounded-[25px] p-6 flex flex-col cursor-pointer hover:shadow-xl transition-all group"
             >
               <div className="flex items-center gap-2 mb-4">
                 <MapPin size={24} className="bg-black text-white p-1 rounded" />
                 <div className="text-base font-bold uppercase">
-                  Lokasi Pihak Ketiga
+                  LOKASI SITACS
                 </div>
               </div>
               <div className="flex-1 rounded-2xl border border-black/5 overflow-hidden">
@@ -562,7 +569,7 @@ const Dashboard = () => {
                   style={{ height: "100%", width: "100%", zIndex: 0 }}
                 >
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  {(data?.markers?.p3 || []).map(
+                  {(data?.markers?.sitac || []).map(
                     (m) =>
                       m.latitude &&
                       m.longitude && (
@@ -576,12 +583,6 @@ const Dashboard = () => {
                             <div className="flex flex-col items-center text-[7px] leading-tight">
                               <span className="font-bold uppercase text-[#1a536e]">
                                 {m.nama_vendor}
-                              </span>
-                              <span className="text-gray-600 italic">
-                                {m.lokasi}
-                              </span>
-                              <span className="text-gray-400 font-mono">
-                                {m.latitude}, {m.longitude}
                               </span>
                             </div>
                           </Tooltip>
