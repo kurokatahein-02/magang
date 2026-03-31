@@ -74,15 +74,40 @@ class DashboardController extends Controller
                 ->whereMonth('tanggal_mulai', $currentMonth)
                 ->whereYear('tanggal_mulai', $currentYear);
 
+            $totalUnit = 0;
+            $openUnit = 0;
+            $closeUnit = 0;
+
+            // B. Tambahan Logika Khusus per Unit
+            if ($unit === 'OSP') {
+                // Tambahkan data dari ThirdParty (Pihak Ketiga) untuk OSP
+                $queryP3 = ThirdParty::whereMonth('tanggal_mulai', $currentMonth)
+                    ->whereYear('tanggal_mulai', $currentYear);
+
+                $totalUnit += (clone $queryP3)->count();
+                $openUnit  += (clone $queryP3)->where('status', 'Open')->count();
+                $closeUnit += (clone $queryP3)->where('status', 'Close')->count();
+            } elseif ($unit === 'HAI') {
+                // Tambahkan data dari LaporanSitac untuk HAI
+                $querySitac = LaporanSitac::whereMonth('tanggal_mulai', $currentMonth)
+                    ->whereYear('tanggal_mulai', $currentYear);
+
+                $totalUnit += (clone $querySitac)->count();
+                $openUnit  += (clone $querySitac)->where('status', 'Open')->count();
+                $closeUnit += (clone $querySitac)->where('status', 'Close')->count();
+            }
+
             $totalUnit = (clone $queryUnit)->count();
             $openUnit  = (clone $queryUnit)->where('status', 'Open')->count();
             $closeUnit = (clone $queryUnit)->where('status', 'Close')->count();
+
 
             $unitStats[$unit] = [
                 'open_percent'  => $totalUnit > 0 ? round(($openUnit / $totalUnit) * 100) : 0,
                 'close_percent' => $totalUnit > 0 ? round(($closeUnit / $totalUnit) * 100) : 0,
                 'open_count'    => $openUnit,
-                'close_count'   => $closeUnit
+                'close_count'   => $closeUnit,
+                'total_count'   => $totalUnit // Tambahkan ini agar frontend lebih mudah
             ];
         }
 
