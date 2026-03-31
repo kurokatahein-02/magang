@@ -18,6 +18,7 @@ function App() {
             <Route path="/control-kegiatan" element={<div />} />
             <Route path="/control-pihak-ketiga" element={<div />} />
             <Route path="/control-sitac" element={<div />} />
+            <Route path="/olt" element={<div/>} />
             <Route path="/inventory" element={<div />} />
             <Route path="/kelola-akun" element={<div />} />
           </Route>

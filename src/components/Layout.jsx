@@ -69,6 +69,7 @@ const Layout = ({ children }) => {
     "/control-kegiatan": "CONTROL KEGIATAN",
     "/control-pihak-ketiga": "CONTROL PIHAK KE TIGA",
     "/control-sitac": "CONTROL SITAC",
+    "/olt": "OLT DEVICE", // Tambahkan ini
     "/inventory": "INVENTORY",
     "/kelola-akun": "KELOLA AKUN",
   };
@@ -87,7 +88,7 @@ const Layout = ({ children }) => {
         path: "/control-kegiatan",
         icon: LaptopMinimalCheck,
       },
-      { name: "OLT", path: "/control-sitac", icon: MapPinned },
+      { name: "OLT", path: "/olt", icon: MapPinned }, // Path diubah ke /olt
       { name: "INVENTORY", path: "/inventory", icon: Box },
     ];
   } else if (role === "osp") {
@@ -185,6 +186,10 @@ const Layout = ({ children }) => {
         if (role === "isp") return <MapPersebaranOLT />;
         if (role === "hai") return <ControlSitacHAI />;
         return <ControlSitacDefault />;
+
+        case "/olt": // Tambahkan case baru khusus OLT
+        if (role === "isp") return <MapPersebaranOLT />;
+        return <MapPersebaranOLT/>;
 
       case "/inventory":
         if (role === "isp") return <InventoryISP />;
