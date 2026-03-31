@@ -127,6 +127,21 @@ class DashboardController extends Controller
             ->whereNotNull('tanggal_berakhir')
             ->whereDate('tanggal_berakhir', '<=', $threeMonthsFromNow)->get();
 
+        // Alert OLT: Perangkat dengan status baterai 'Bad'
+        $queryOlt = OltDevice::where('status_baterai', 'Bad');
+
+        // Filter berdasarkan bulan/tahun jika relevan (menggunakan updated_at sebagai indikator kapan status menjadi Bad)
+        $queryOlt->whereMonth('updated_at', $currentMonth)
+                 ->whereYear('updated_at', $currentYear);
+
+        $alertOlt = $queryOlt->get()->map(fn($item) => [
+            'id'             => $item->id,
+            'nama_olt'       => $item->nama_perangkat,
+            'lokasi'         => $item->lokasi,
+            'battery_status' => $item->status_baterai,
+            'status'         => 'URGENT',
+        ]);
+
         $sitacMarkers = LaporanSitac::select('id', 'nama_vendor', 'lokasi', 'latitude', 'longitude')->get();
         $p3Markers = ThirdParty::select('id', 'nama_vendor', 'lokasi', 'latitude', 'longitude',)->get();
         // Ambil data koordinat OLT
@@ -153,6 +168,7 @@ class DashboardController extends Controller
                 'alerts'         => [
                     'sitac' => $alertSitac,
                     'kegiatan' => $alertKegiatan,
+                    'olt'      => $alertOlt,
                 ],
                 'markers'        => [
                     'sitac' => $sitacMarkers,
