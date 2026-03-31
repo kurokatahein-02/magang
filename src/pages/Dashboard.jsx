@@ -124,10 +124,12 @@ const Dashboard = () => {
   if (expanded) {
     const isSitac = expanded === "detail-alert-sitac";
     const isKegiatan = expanded === "detail-alert-kegiatan"; // Ubah dari isP3
+    const isOlt = expanded === "detail-alert-olt";
     const alertData = isSitac
       ? data.alerts.sitac
       : isKegiatan
         ? data.alerts.kegiatan
+        : isOlt ? data.alerts.olt
         : [];
 
     return (
@@ -135,7 +137,7 @@ const Dashboard = () => {
         <HeaderZoom title={expanded.replace(/-/g, " ")} />
 
         <div className="flex-1 bg-white border border-black rounded-[30px] p-8 shadow-2xl overflow-hidden flex flex-col">
-          {isSitac || isKegiatan ? (
+          {isSitac || isKegiatan || isOlt ? (
             <div className="flex-1 flex flex-col">
               <div className="mb-6 flex items-center gap-4">
                 <div className="bg-red-500 text-white p-2 rounded-lg animate-pulse">
@@ -143,14 +145,18 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <h4 className="font-bold text-lg uppercase">
-                    {isKegiatan
-                      ? "Daftar Kegiatan Belum Close (Tunggakan)"
-                      : "Daftar Dokumen SITAC Mendekati Deadline"}
+                    {isKegiatan 
+                      ? "Daftar Kegiatan Belum Close (Tunggakan)" 
+                      : isSitac 
+                        ? "Daftar Dokumen SITAC Mendekati Deadline"
+                        : "Daftar OLT dengan Status Baterai BAD"}
                   </h4>
                   <p className="text-xs text-gray-500 italic">
-                    {isKegiatan
-                      ? "* Menampilkan kegiatan bulan-bulan sebelumnya yang belum diselesaikan."
-                      : "* Menampilkan data dengan sisa masa aktif < 3 bulan."}
+                    {isKegiatan 
+                      ? "* Menampilkan kegiatan bulan-bulan sebelumnya yang belum diselesaikan." 
+                      : isSitac 
+                        ? "* Menampilkan data dengan sisa masa aktif < 3 bulan."
+                        : "* Menampilkan unit OLT yang membutuhkan penggantian baterai segera."}
                   </p>
                 </div>
               </div>
@@ -164,13 +170,13 @@ const Dashboard = () => {
                       </th>
                       {/* Header Kolom Berubah Sesuai Jenis Alert */}
                       <th className="p-4 border-b border-black text-xs font-bold uppercase">
-                        {isKegiatan ? "Nama Kegiatan" : "Nama Vendor / Lahan"}
+                        {isKegiatan ? "Nama Kegiatan" : isSitac ? "Nama Vendor / Lahan" : "Nama Unit OLT"}
                       </th>
                       <th className="p-4 border-b border-black text-xs font-bold uppercase">
-                        {isKegiatan ? "Unit" : "Lokasi"}
+                        {isKegiatan ? "Unit" : "Lokasi / Alamat"}
                       </th>
                       <th className="p-4 border-b border-black text-xs font-bold uppercase text-center">
-                        {isKegiatan ? "Tanggal Mulai" : "Tanggal Berakhir"}
+                        {isKegiatan ? "Tanggal Mulai" : isSitac ? "Tanggal Berakhir" : "Status Baterai"}
                       </th>
                       <th className="p-4 border-b border-black text-xs font-bold uppercase text-center">
                         Status
@@ -188,7 +194,7 @@ const Dashboard = () => {
                             {index + 1}
                           </td>
                           <td className="p-4 text-xs font-bold uppercase">
-                            {isKegiatan ? item.nama_kegiatan : item.nama_vendor}
+                            {isKegiatan ? item.nama_kegiatan : isSitac ? item.nama_vendor : item.nama_olt}
                           </td>
                           <td className="p-4 text-xs uppercase">
                             {isKegiatan ? item.unit : item.lokasi}
@@ -196,7 +202,9 @@ const Dashboard = () => {
                           <td className="p-4 text-xs text-center font-mono text-red-600 font-bold">
                             {isKegiatan
                               ? item.tanggal_mulai
-                              : item.tanggal_berakhir}
+                              : isSitac 
+                                ? item.tanggal_berakhir 
+                                : item.battery_status}
                           </td>
                           <td className="p-4 text-center">
                             <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-[10px] font-bold border border-red-200">
@@ -211,7 +219,7 @@ const Dashboard = () => {
                           colSpan="5"
                           className="p-10 text-center text-gray-400 italic"
                         >
-                          Tidak ada tunggakan kegiatan.
+                          Tidak ada data notifikasi saat ini.
                         </td>
                       </tr>
                     )}
@@ -462,7 +470,7 @@ const Dashboard = () => {
             </div>
 
             {/* Alerts Container */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-5">
               {/* Alert SITAC */}
               <AlertBox
                 title="Notifikasi SITAC"
@@ -476,6 +484,13 @@ const Dashboard = () => {
                 count={data?.alerts?.kegiatan?.length || 0}
                 msg="BELUM DISELESAIKAN DARI BULAN LALU"
                 onClick={() => setExpanded("detail-alert-kegiatan")}
+              />
+              {/* Alert OLT Battery Status */}
+              <AlertBox
+                title="Notifikasi Baterai OLT"
+                count={data?.alerts?.olt?.length || 0}
+                msg="STATUS BAD - PERLU PENGGANTIAN"
+                onClick={() => setExpanded("detail-alert-olt")}
               />
             </div>
           </div>
