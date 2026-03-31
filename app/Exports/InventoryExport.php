@@ -3,78 +3,52 @@
 namespace App\Exports;
 
 use App\Models\Inventory;
-use Maatwebsite\Excel\Concerns\FromQuery;
-use Maatwebsite\Excel\Concerns\Exportable;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Illuminate\Http\Request;
 
-class InventoryExport implements FromQuery, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+class InventoryExport implements FromCollection, WithHeadings, WithMapping
 {
-    use Exportable;
-
     protected $request;
-    protected $rowNumber = 0;
 
-    public function __construct($request)
+    public function __construct(Request $request)
     {
         $this->request = $request;
     }
 
-    // 1. Logika Filter Data (Sama dengan fungsi index di Controller)
-    public function query()
+    public function collection()
     {
         $query = Inventory::query();
 
-        if ($this->request->unit && $this->request->unit != 'ALL') {
+        if ($this->request->filled('unit') && $this->request->unit !== 'ALL') {
             $query->where('unit', $this->request->unit);
         }
 
-        if ($this->request->search) {
-            $searchTerm = $this->request->search;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('nama_barang', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('lokasi', 'like', '%' . $searchTerm . '%');
+        if ($this->request->filled('search')) {
+            $query->where(function ($q) {
+                $q->where('nama_barang', 'like', '%' . $this->request->search . '%')
+                  ->orWhere('lokasi', 'like', '%' . $this->request->search . '%');
             });
         }
 
-        return $query->latest();
+        return $query->latest()->get();
     }
 
-    // 2. Judul Kolom di Excel
     public function headings(): array
     {
-        return [
-            'NO',
-            'NAMA BARANG',
-            'JUMLAH',
-            'UNIT',
-            'LOKASI',
-            'TANGGAL INPUT'
-        ];
+        return ['ID', 'Nama Barang', 'Jumlah Stok', 'Unit', 'Lokasi', 'Tanggal Input'];
     }
 
-    // 3. Mapping Data ke Baris Tabel
     public function map($inventory): array
     {
-        $this->rowNumber++;
         return [
-            $this->rowNumber,
-            strtoupper($inventory->nama_barang),
+            $inventory->id,
+            $inventory->nama_barang,
             $inventory->jumlah_barang,
-            strtoupper($inventory->unit),
-            strtoupper($inventory->lokasi),
-            $inventory->created_at->format('Y-m-d')
-        ];
-    }
-
-    // 4. Styling Header (Tebal)
-    public function styles(Worksheet $sheet)
-    {
-        return [
-            1 => ['font' => ['bold' => true]],
+            $inventory->unit,
+            $inventory->lokasi,
+            $inventory->created_at->format('d/m/Y H:i'),
         ];
     }
 }

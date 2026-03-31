@@ -4,43 +4,42 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Inventory;
+use App\Models\InventoryHistory;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\InventoryExport;
+use App\Exports\InventoryExport; // Pastikan class export ini dibuat jika ingin fitur download jalan
+use App\Exports\InventoryHistoryExport;
 
 class InventoryController extends Controller
 {
-    // Ambil semua data (bisa difilter berdasarkan unit/kategori)
     public function index(Request $request)
     {
         $query = Inventory::query();
 
-        // Fitur Filter (OSP, ISP, ASO, HI)
-        if ($request->has('unit') && $request->unit != 'ALL') {
+        if ($request->filled('unit') && $request->unit !== 'ALL') {
             $query->where('unit', $request->unit);
         }
 
-        // Fitur Search
-        if ($request->has('search')) {
-            $searchTerm = $request->search;
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('nama_barang', 'like', '%' . $searchTerm . '%')
-                    ->orWhere('jumlah_barang', 'like', '%' . $searchTerm . '%')
-                    ->orWhere('unit', 'like', '%' . $searchTerm . '%')
-                    ->orWhere('lokasi', 'like', '%' . $searchTerm . '%');
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nama_barang', 'like', '%' . $request->search . '%')
+                  ->orWhere('lokasi', 'like', '%' . $request->search . '%');
             });
         }
-        $data = $query->latest()->get();
-        return response()->json(['success' => true, 'data' => $data]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $query->latest()->get()
+        ]);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'nama_barang'   => 'required|string',
-            'jumlah_barang' => 'required|string',
-            'unit'          => 'required|in:OSP,ISP,ASO,HAI',
-            'lokasi'        => 'required|string',
+            'nama_barang' => 'required|string',
+            'jumlah_barang' => 'required|numeric',
+            'unit' => 'required|string',
+            'lokasi' => 'nullable|string',
         ]);
 
         $inventory = Inventory::create($request->all());
@@ -52,21 +51,68 @@ class InventoryController extends Controller
     {
         $inventory = Inventory::findOrFail($id);
         $inventory->update($request->all());
-
         return response()->json(['success' => true, 'data' => $inventory]);
     }
 
     public function destroy($id)
     {
-        Inventory::findOrFail($id)->delete();
-        return response()->json(['success' => true, 'message' => 'Barang berhasil dihapus']);
+        $inventory = Inventory::findOrFail($id);
+        $inventory->delete();
+        return response()->json(['success' => true, 'message' => 'Data inventori berhasil dihapus']);
+    }
+
+    /**
+     * Fitur Ambil Barang: Mengurangi stok dan mencatat ke tabel histori
+     */
+    public function take(Request $request, $id)
+    {
+        $request->validate([
+            'jumlah' => 'required|numeric|min:1',
+            'unit' => 'required|string', // Unit pengambil
+        ]);
+
+        $inventory = Inventory::findOrFail($id);
+
+        // Validasi stok mencukupi
+        if ($inventory->jumlah_barang < $request->jumlah) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'Stok tidak mencukupi untuk pengambilan sejumlah ' . $request->jumlah
+            ], 400);
+        }
+
+        // Kurangi stok barang utama
+        $inventory->decrement('jumlah_barang', $request->jumlah);
+
+        // Simpan catatan ke histori
+        InventoryHistory::create([
+            'inventory_id' => $inventory->id,
+            'nama_barang' => $inventory->nama_barang,
+            'jumlah' => $request->jumlah,
+            'unit' => $request->unit,
+        ]);
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Barang berhasil diambil.'
+        ]);
+    }
+
+    public function history()
+    {
+        $history = InventoryHistory::latest()->get();
+        return response()->json(['success' => true, 'data' => $history]);
     }
 
     public function export(Request $request)
     {
-        $unitLabel = strtoupper($request->unit ?? 'ALL');
-        $fileName = 'Laporan_Inventory_' . $unitLabel . '_' . now()->format('Ymd_His') . '.xlsx';
-
+        $fileName = 'Laporan_Inventori_' . now()->format('Ymd_His') . '.xlsx';
         return Excel::download(new InventoryExport($request), $fileName);
+    }
+
+    public function exportHistory()
+    {
+        $fileName = 'Histori_Pengambilan_' . now()->format('Ymd_His') . '.xlsx';
+        return Excel::download(new InventoryHistoryExport, $fileName);
     }
 }

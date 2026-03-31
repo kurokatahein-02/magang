@@ -36,8 +36,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('activities', ActivityController::class);
 
     // Inventories
-    Route::get('/inventories/export', [InventoryController::class, 'export']); // Di atas {id}
+    Route::get('/inventories/export', [InventoryController::class, 'export']);
+    Route::get('/inventories/history', [InventoryController::class, 'history']);
+    Route::get('/inventories/history/export', [InventoryController::class, 'exportHistory']);
+    Route::post('/inventories/{id}/take', [InventoryController::class, 'take']);
     Route::apiResource('inventories', InventoryController::class);
+
 
     // Third Party
     Route::get('/third-parties/download/{id}', [ThirdPartyController::class, 'downloadFile']);

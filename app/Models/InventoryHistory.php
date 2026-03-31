@@ -4,20 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Inventory extends Model
+class InventoryHistory extends Model
 {
-    use SoftDeletes;
     use HasFactory;
-    
 
     protected $fillable = [
+        'inventory_id',
         'nama_barang',
-        'jumlah_barang',
-        'unit',
-        'lokasi',
-        'latitude',
-        'longitude'
+        'jumlah',
+        'unit'
     ];
 }
