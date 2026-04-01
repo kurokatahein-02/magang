@@ -7,6 +7,7 @@ import {
   Users,
   MapPinned,
   Box,
+  Database,
 } from "lucide-react"; // Contoh icon, bisa diganti sesuai kebutuhan
 import { Outlet } from "react-router-dom";
 import api from '../api';
@@ -19,6 +20,7 @@ import ControlSitacDefault from "../pages/ControlSitac";
 import MiniOltDefault from "../pages/MiniOlt";
 import InventoryDefault from "../pages/Inventory";
 import KelolaAkun from "../pages/KelolaAkun";
+import PotensiData from "../pages/PotensiData";
 
 // 2. IMPORT COMPONENT KHUSUS DIVISI ISP
 import ControlKegiatanISP from "../pages/isp/ControlKegiatanISP";
@@ -72,6 +74,7 @@ const Layout = ({ children }) => {
     "/control-sitac": "CONTROL SITAC",
     "/olt": "OLT DEVICE", // Tambahkan ini
     "/inventory": "INVENTORY",
+    "/potensi-data": "DATA POTENSI",
     "/kelola-akun": "KELOLA AKUN",
   };
 
@@ -91,6 +94,7 @@ const Layout = ({ children }) => {
       },
       { name: "OLT", path: "/olt", icon: MapPinned }, // Path diubah ke /olt
       { name: "INVENTORY", path: "/inventory", icon: Box },
+      { name: "DATA POTENSI", path: "/potensi-data", icon: Database },
     ];
   } else if (role === "osp") {
     // MENU KHUSUS OSP (Tanpa Pihak Ketiga & Sitac)
@@ -107,6 +111,7 @@ const Layout = ({ children }) => {
         icon: Users,
       },
       { name: "INVENTORY", path: "/inventory", icon: Box },
+      { name: "DATA POTENSI", path: "/potensi-data", icon: Database },
     ];
   } else if (role === "aso") {
     // MENU KHUSUS ASO (Hanya Dashboard, Control Kegiatan, dan Inventory)
@@ -118,6 +123,7 @@ const Layout = ({ children }) => {
         icon: LaptopMinimalCheck,
       },
       { name: "INVENTORY", path: "/inventory", icon: Box },
+      { name: "DATA POTENSI", path: "/potensi-data", icon: Database },
     ];
   } else if (role === "hai") {
     // MENU KHUSUS HAI (Hanya Dashboard, Control Kegiatan, Control Sitac, dan Inventory)
@@ -130,6 +136,7 @@ const Layout = ({ children }) => {
       },
       { name: "CONTROL SITAC", path: "/control-sitac", icon: MapPinned },
       { name: "INVENTORY", path: "/inventory", icon: Box },
+      { name: "DATA POTENSI", path: "/potensi-data", icon: Database },
     ];
   } else {
     // MENU DEFAULT UNTUK SUPERADMIN / MANAGER
@@ -140,6 +147,7 @@ const Layout = ({ children }) => {
       { name: "LAPORAN/SITAC", path: "/control-sitac", icon: MapPinned },
       { name: "Mini-OLT", path: "/olt", icon: MapPinned },
       { name: "INVENTORY", path: "/inventory", icon: Box },
+      { name: "DATA POTENSI", path: "/potensi-data", icon: Database },
       { name: "KELOLA AKUN", path: "/kelola-akun", icon: Users },
     ];
   }
@@ -191,7 +199,7 @@ const Layout = ({ children }) => {
 
         case "/olt": // Tambahkan case baru khusus OLT
         if (role === "isp") return <MapPersebaranOLT />;
-        return <MapPersebaranOLT/>;
+        return <MiniOltDefault />;
 
       case "/inventory":
         if (role === "isp") return <InventoryISP />;
@@ -199,6 +207,9 @@ const Layout = ({ children }) => {
         if (role === "aso") return <InventoryASO />;
         if (role === "hai") return <InventoryHAI />;
         return <InventoryDefault />;
+
+      case "/potensi-data":
+        return <PotensiData />;
 
       case "/kelola-akun":
         return <KelolaAkun />;
@@ -282,10 +293,8 @@ const Layout = ({ children }) => {
           {/* HEADER DIPERKECIL (h-14, font lebih kecil) */}
           <header className="h-14 bg-[#386097] flex justify-between items-center px-6 border-b border-black text-white shrink-0">
             <div className="flex items-center gap-5">
-              <div className="w-[2px] h-8 bg-white/50"></div>
-              <h2 className="text-xl font-black tracking-[0.2em] text-[#dc2626] uppercase select-none">
-                {currentTitle}
-              </h2>
+              <div className="w-[2px] h-8 "></div>
+              
             </div>
 
             <div className="flex items-center gap-3">
@@ -298,9 +307,9 @@ const Layout = ({ children }) => {
                 </span>
               </div>
 
-              {/* Profile image diperkecil (w-10 h-10) */}
-              <div className="shrink-0 w-10 h-10 bg-white rounded-full border border-black shadow-inner overflow-hidden">
-                <img src={myLogo} alt="Profile" className="w-full h-full object-cover" />
+              {/* Profile icon diperkecil (w-10 h-10) */}
+              <div className="shrink-0 w-10 h-10 bg-white rounded-full border border-black shadow-inner flex items-center justify-center text-[#386097]">
+                <Users size={24} />
               </div>
             </div>
           </header>

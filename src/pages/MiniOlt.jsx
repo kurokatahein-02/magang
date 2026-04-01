@@ -543,10 +543,16 @@ const MiniOlt = () => {
                       </td>
                       <td className="border-r border-black px-2">
                         <div className="relative group">
-                          <select 
+                          <select
+                            disabled={isReadOnly}
                             value={v.battery}
+                            onMouseDown={(e) => {
+                              if (isReadOnly) e.preventDefault();
+                            }}
+                            onClick={(e) => e.stopPropagation()}
                             onChange={(e) => updateBatteryStatus(v.id, e.target.value)}
-                            className={`w-full py-1 rounded-full text-[9px] font-bold border text-center appearance-none cursor-pointer transition-all shadow-sm
+                            className={`w-full py-1 rounded-full text-[9px] font-bold border text-center appearance-none transition-all shadow-sm
+                              ${isReadOnly ? 'cursor-default opacity-80' : 'cursor-pointer'}
                               ${v.battery === 'Good' ? 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100' : 
                                 v.battery === 'Average' ? 'bg-yellow-50 text-yellow-600 border-yellow-200 hover:bg-yellow-100' : 
                                 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'}`}
@@ -555,10 +561,11 @@ const MiniOlt = () => {
                             <option value="Average">AVERAGE</option>
                             <option value="Bad">BAD</option>
                           </select>
-                          {/* Icon indikator kecil agar user tahu ini bisa diklik */}
-                          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 group-hover:opacity-100">
-                            <ChevronDown size={8} />
-                          </div>
+                          {!isReadOnly && (
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 group-hover:opacity-100">
+                              <ChevronDown size={8} />
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="px-4">

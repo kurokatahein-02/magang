@@ -133,12 +133,12 @@ const Dashboard = () => {
         : [];
 
     return (
-      <div className="absolute inset-0 z-50 bg-[#f8f9fa] p-8 animate-fadeIn flex flex-col overflow-hidden">
+      <div className="absolute inset-0 z-50 bg-[#f8f9fa] p-8 animate-fadeIn flex flex-col overflow-hidden min-h-0">
         <HeaderZoom title={expanded.replace(/-/g, " ")} />
 
-        <div className="flex-1 bg-white border border-black rounded-[30px] p-8 shadow-2xl overflow-hidden flex flex-col">
+        <div className="flex-1 bg-white border border-black rounded-[30px] p-8 shadow-2xl overflow-hidden flex flex-col min-h-0">
           {isSitac || isKegiatan || isOlt ? (
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col min-h-0">
               <div className="mb-6 flex items-center gap-4">
                 <div className="bg-red-500 text-white p-2 rounded-lg animate-pulse">
                   <AlertTriangle size={24} />
@@ -161,7 +161,7 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              <div className="overflow-auto border border-black rounded-xl">
+              <div className="flex-1 overflow-auto border border-black rounded-xl min-h-0">
                 <table className="w-full text-left border-collapse">
                   <thead className="bg-[#386097] text-white sticky top-0">
                     <tr>
@@ -549,19 +549,42 @@ const Dashboard = () => {
           <div className="grid grid-cols-2 gap-6 h-[300px]">
             <div
               onClick={() => (window.location.href = "/inventory")}
-              className="bg-white border border-black rounded-[25px] p-6 flex flex-col cursor-pointer hover:shadow-xl transition-all"
+              className="bg-white border border-black rounded-[25px] p-6 flex flex-col cursor-pointer hover:shadow-xl transition-all h-full"
             >
               <div className="flex items-center gap-2 mb-4 text-[#1a536e]">
                 <Package size={20} />
-                <div className="text-base font-bold uppercase">Inventory</div>
+                <div className="text-base font-bold uppercase tracking-widest">Histori Pengambilan</div>
               </div>
-              <div className="flex-1 flex flex-col items-center justify-center">
-                <div className="text-5xl font-black mb-2">
-                  {data.inventoryCount}
+
+              <div className="flex-1 overflow-y-auto no-scrollbar space-y-3">
+                {data?.inventoryHistory?.length > 0 ? (
+                  data.inventoryHistory.map((item, idx) => (
+                    <div key={idx} className="flex justify-between items-center border-b border-black/5 pb-2 hover:bg-gray-50 transition-colors px-1">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-black uppercase text-black truncate w-32">
+                          {item.nama_barang}
+                        </span>
+                        <span className="text-[8px] text-gray-400 font-bold uppercase">
+                          {item.unit} • {new Date(item.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })}
+                        </span>
+                      </div>
+                      <div className="bg-red-50 text-red-600 border border-red-100 px-2 py-0.5 rounded text-[10px] font-black">
+                        -{item.jumlah}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="h-full flex items-center justify-center text-[10px] text-gray-400 italic">
+                    Belum ada riwayat pengambilan.
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-4 pt-2 border-t border-black/5 flex justify-between items-end">
+                <div className="text-[9px] uppercase font-bold text-gray-400">
+                  {data.inventoryCount} Jenis Barang
                 </div>
-                <div className="text-[10px] uppercase font-bold text-gray-400">
-                  Total Jenis Barang
-                </div>
+                <div className="text-[9px] font-black text-[#386097] underline">Kelola</div>
               </div>
             </div>
 

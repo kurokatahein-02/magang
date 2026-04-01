@@ -23,6 +23,7 @@ function App() {
             <Route path="/control-sitac" element={<div />} />
             <Route path="/olt" element={<div/>} />
             <Route path="/inventory" element={<div />} />
+            <Route path="/potensi-data" element={<div />} />
             <Route path="/kelola-akun" element={<div />} />
             <Route path="/mini-olt" element={<div />} />
           </Route>

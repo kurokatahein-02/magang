@@ -7,10 +7,16 @@ const API_URL = "http://127.0.0.1:8000/api/inventories";
 
 const Inventory = () => {
   const [view, setView] = useState("table");
+  const userRaw = localStorage.getItem("user");
+  const userData = userRaw ? JSON.parse(userRaw) : null;
+  const role = userData?.role || "";
+  const userUnit = userData?.unit?.toUpperCase() || "";
+  const isSuperAdmin = role === "superadmin";
+  const isReadOnly = role === "manager";
+
   const [expandedTable, setExpandedTable] = useState(null);
-  const [activeFilter, setActiveFilter] = useState("ALL");
+  const [activeFilter, setActiveFilter] = useState(isSuperAdmin ? "ALL" : userUnit || "ALL");
   const [searchTerm, setSearchTerm] = useState("");
-  const [showNotification, setShowNotification] = useState(false);
   const [inventoryList, setInventoryList] = useState([]);
   const [historyList, setHistoryList] = useState([]);
   const [takeFormData, setTakeFormData] = useState({
@@ -26,14 +32,6 @@ const Inventory = () => {
     unit: "",
     location: "",
   });
-  const userRaw = localStorage.getItem("user");
-  const userData = userRaw ? JSON.parse(userRaw) : null;
-  const role = userData?.role || "";
-
-  // Variabel Sakti
-  const isReadOnly = role === "manager";
-  const isSuperAdmin = role === "superadmin";
-  // Tambahkan fungsi ini di dalam komponen Inventory, sebelum baris return
   const handleExportExcel = async () => {
     try {
       const response = await api.get("/inventories/export", {
@@ -136,7 +134,9 @@ const Inventory = () => {
 
   const fetchHistory = async () => {
     try {
-      const response = await api.get(`${API_URL}/history`);
+      const response = await api.get(`${API_URL}/history`, {
+        params: { unit: isSuperAdmin ? activeFilter : userUnit }
+      });
       setHistoryList(response.data.data);
       setView("history");
     } catch (error) {
@@ -167,7 +167,9 @@ const Inventory = () => {
       inventory_id: item.id,
       name: item.name,
       amountTaken: "",
-      unit: "",
+      // Jika Superadmin: default ke unit pemilik barang, tapi bisa diubah (mewakilkan)
+      // Jika Staff: kunci otomatis ke unit user itu sendiri
+      unit: isSuperAdmin ? item.unit : userUnit,
     });
     setView("take");
   };
@@ -389,7 +391,8 @@ const Inventory = () => {
                 <select
                   value={takeFormData.unit}
                   onChange={(e) => setTakeFormData({ ...takeFormData, unit: e.target.value })}
-                  className="w-full p-3 rounded-lg border border-black bg-[#d9d9d9] italic px-6 focus:outline-none appearance-none cursor-pointer"
+                  disabled={!isSuperAdmin}
+                  className="w-full p-3 rounded-lg border border-black bg-[#d9d9d9] italic px-6 focus:outline-none appearance-none cursor-pointer disabled:bg-gray-200 disabled:opacity-70"
                 >
                   <option value="">Pilih Unit ....</option>
                   <option value="OSP">OSP</option>
@@ -397,7 +400,7 @@ const Inventory = () => {
                   <option value="ASO">ASO</option>
                   <option value="HAI">HAI</option>
                 </select>
-                <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
+                {isSuperAdmin && <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />}
               </div>
             </div>
           </div>
@@ -529,7 +532,7 @@ const Inventory = () => {
           <div className="flex justify-between items-end mb-4">
             {/* Group Filter di Kiri */}
             <div className="flex gap-2">
-              {["OSP", "ISP", "ASO", "HAI", "ALL"].map((f) => (
+              {(isSuperAdmin ? ["OSP", "ISP", "ASO", "HAI", "ALL"] : [userUnit]).map((f) => (
                 <button
                   key={f}
                   onClick={() => setActiveFilter(f)}

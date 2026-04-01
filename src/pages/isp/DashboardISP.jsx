@@ -6,6 +6,7 @@ import {
   Timer,
   Package,
   MapPin,
+  AlertTriangle,
 } from "lucide-react";
 import api from '../../api';
 import { MapContainer, TileLayer, Marker, Popup, Tooltip } from "react-leaflet"; //
@@ -68,6 +69,92 @@ const DashboardISP = () => {
     return () => clearInterval(interval);
   }, [selectedMonth, selectedYear]);
 
+  const HeaderZoom = ({ title }) => (
+    <div className="relative mb-8 flex items-center justify-center min-h-[40px] w-full">
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setExpanded(null);
+        }}
+        className="absolute left-0 top-1/2 -translate-y-1/2 bg-white border border-black rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:scale-110 transition-all z-[70]"
+      >
+        <span className="text-2xl font-bold">←</span>
+      </button>
+      <h3 className="font-bold text-xl uppercase tracking-[0.2em]">{title}</h3>
+    </div>
+  );
+
+  if (expanded) {
+    const isKegiatan = expanded === "detail-alert-kegiatan";
+    const isOlt = expanded === "detail-alert-olt";
+    const alertData = isKegiatan
+      ? (data.alerts?.kegiatan || []).filter((item) => item.unit.toLowerCase() === "isp")
+      : isOlt
+      ? data.alerts?.olt || []
+      : [];
+
+    return (
+      <div className="absolute inset-0 z-50 bg-[#f8f9fa] p-8 animate-fadeIn flex flex-col overflow-hidden">
+        <HeaderZoom title={isKegiatan ? "Detail Notifikasi Kegiatan ISP" : "Detail Notifikasi Baterai OLT"} />
+
+        <div className="flex-1 bg-white border border-black rounded-[30px] p-8 shadow-2xl overflow-hidden flex flex-col min-h-0">
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className="mb-6 flex items-center gap-4">
+              <div className="bg-red-500 text-white p-2 rounded-lg animate-pulse">
+                <AlertTriangle size={24} />
+              </div>
+              <div>
+                <h4 className="font-bold text-lg uppercase">
+                  {isKegiatan ? "Daftar Kegiatan ISP Belum Close (Tunggakan)" : "Daftar OLT dengan Status Baterai BAD"}
+                </h4>
+                <p className="text-xs text-gray-500 italic">
+                  {isKegiatan
+                    ? "* Menampilkan kegiatan ISP bulan-bulan sebelumnya yang belum diselesaikan."
+                    : "* Menampilkan unit OLT yang membutuhkan penggantian baterai segera."}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-auto border border-black rounded-xl min-h-0">
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-[#386097] text-white sticky top-0">
+                  <tr>
+                    <th className="p-4 border-b border-black text-xs font-bold uppercase w-16 text-center">No</th>
+                    <th className="p-4 border-b border-black text-xs font-bold uppercase">{isKegiatan ? "Nama Kegiatan" : "Nama Unit OLT"}</th>
+                    <th className="p-4 border-b border-black text-xs font-bold uppercase">{isKegiatan ? "Unit" : "Lokasi / Alamat"}</th>
+                    <th className="p-4 border-b border-black text-xs font-bold uppercase text-center">{isKegiatan ? "Tanggal Mulai" : "Status Baterai"}</th>
+                    <th className="p-4 border-b border-black text-xs font-bold uppercase text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {alertData.length > 0 ? (
+                    alertData.map((item, index) => (
+                      <tr key={item.id} className="hover:bg-red-50 transition-colors border-b border-gray-100">
+                        <td className="p-4 text-xs font-bold text-center">{index + 1}</td>
+                        <td className="p-4 text-xs font-bold uppercase">{isKegiatan ? item.nama_kegiatan : item.nama_olt}</td>
+                        <td className="p-4 text-xs uppercase">{isKegiatan ? item.unit : item.lokasi}</td>
+                        <td className="p-4 text-xs text-center font-mono text-red-600 font-bold">{isKegiatan ? item.tanggal_mulai : item.battery_status}</td>
+                        <td className="p-4 text-center">
+                          <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-[10px] font-bold border border-red-200">
+                            {item.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="p-10 text-center text-gray-400 italic">Tidak ada data notifikasi saat ini.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (loading)
     return (
       <div className="h-full flex items-center justify-center font-bold animate-pulse text-[#56a8c7] tracking-widest uppercase">
@@ -88,6 +175,12 @@ const DashboardISP = () => {
     (ISPStats.open_count || 0) + (ISPStats.close_count || 0);
   // Progres diasumsikan sejajar dengan persentase kegiatan yang sudah 'Close'
   const progressISP = ISPStats.close_percent || 0;
+
+  // Filter Alert khusus ISP
+  const ispAlertCount = (data?.alerts?.kegiatan || []).filter(
+    (item) => item.unit.toLowerCase() === "isp"
+  ).length;
+  const oltAlertCount = data?.alerts?.olt?.length || 0;
 
   return (
     <div className="h-full flex flex-col gap-6 select-none relative p-2 overflow-y-auto no-scrollbar pb-20">
@@ -184,25 +277,60 @@ const DashboardISP = () => {
       <div className="flex-1 grid grid-cols-12 gap-6 min-h-0">
         {/* KIRI: DONUT CHART & INVENTORY (Span 5) */}
         <div className="col-span-5 flex flex-col gap-6 h-full">
+          <AlertBox
+            title="Notifikasi Baterai OLT"
+            count={oltAlertCount}
+            msg="STATUS BAD - PERLU PENGGANTIAN"
+            onClick={() => setExpanded("detail-alert-olt")}
+          />
+          <AlertBox
+            title="Notifikasi Kegiatan Open"
+            count={ispAlertCount}
+            msg="ISP BELUM DISELESAIKAN"
+            onClick={() => setExpanded("detail-alert-kegiatan")}
+          />
+
           <DonutBox title="Progres Kegiatan ISP" stats={ISPStats} />
 
           {/* KOTAK INVENTORY */}
           <div
             onClick={() => (window.location.href = "/inventory")}
-            className="bg-white border border-black rounded-[20px] p-6 h-[35%] flex flex-col shadow-sm cursor-pointer hover:shadow-md transition-all group relative overflow-hidden"
+            className="bg-white border border-black rounded-[20px] p-6 h-[45%] flex flex-col shadow-sm cursor-pointer hover:shadow-md transition-all group relative overflow-hidden"
           >
             <div className="flex items-center gap-2 mb-4 text-[#1a536e]">
               <Package size={20} />
-              <div className="text-base font-bold uppercase">Inventory</div>
+              <div className="text-base font-bold uppercase tracking-widest">Histori Pengambilan</div>
             </div>
 
-            <div className="flex-1 flex flex-col items-center justify-center">
-              <div className="text-5xl font-black mb-1 text-black">
-                {ISPInventoryCount}
+            <div className="flex-1 overflow-y-auto no-scrollbar space-y-3">
+              {data?.inventoryHistory?.length > 0 ? (
+                data.inventoryHistory.map((item, idx) => (
+                  <div key={idx} className="flex justify-between items-center border-b border-black/5 pb-2 hover:bg-gray-50 transition-colors px-1">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-black uppercase text-black truncate w-32">
+                        {item.nama_barang}
+                      </span>
+                      <span className="text-[8px] text-gray-400 font-bold uppercase">
+                        {new Date(item.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })}
+                      </span>
+                    </div>
+                    <div className="bg-red-50 text-red-600 border border-red-100 px-2 py-0.5 rounded text-[10px] font-black">
+                      -{item.jumlah}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="h-full flex items-center justify-center text-[10px] text-gray-400 italic">
+                  Belum ada riwayat pengambilan.
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 pt-2 border-t border-black/5 flex justify-between items-end">
+              <div className="text-[9px] uppercase font-bold text-gray-400">
+                {ISPInventoryCount} Jenis Barang
               </div>
-              <div className="text-[10px] uppercase font-bold text-gray-400 tracking-widest">
-                Total Jenis Barang
-              </div>
+              <div className="text-[9px] font-black text-[#386097] underline">Kelola</div>
             </div>
           </div>
         </div>
@@ -331,5 +459,34 @@ const DonutBox = ({ title, stats }) => {
     </div>
   );
 };
+
+const AlertBox = ({ title, count, msg, onClick }) => (
+  <div
+    onClick={onClick}
+    className="bg-white border border-black rounded-[20px] p-4 cursor-pointer hover:shadow-lg transition-all flex flex-col group"
+  >
+    <div className="flex items-center gap-2 mb-3 text-red-500">
+      <AlertTriangle size={18} fill="currentColor" className="text-white" />
+      <div className="text-base font-bold uppercase tracking-widest">
+        {title}
+      </div>
+    </div>
+
+    <div className="space-y-1.5 flex-1 flex flex-col justify-center">
+      {count > 0 ? (
+        <div className="bg-red-500 border border-black/5 p-3 rounded-xl text-white flex gap-3 shadow-md animate-pulse">
+          <AlertTriangle size={16} className="shrink-0" />
+          <div className="text-[10px] font-bold leading-tight">
+            ACTION REQUIRED: {count} DATA {msg}
+          </div>
+        </div>
+      ) : (
+        <div className="text-[10px] text-gray-400 italic text-center py-2">
+          Tidak ada kegiatan ISP yang menunggak.
+        </div>
+      )}
+    </div>
+  </div>
+);
 
 export default DashboardISP;
