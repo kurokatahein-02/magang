@@ -8,6 +8,7 @@ use App\Models\Activity;
 use App\Models\ThirdParty;
 use App\Models\LaporanSitac;
 use App\Models\Inventory;
+use App\Models\InventoryHistory;
 use Carbon\Carbon;
 use App\Models\OltDevice; //
 
@@ -114,42 +115,75 @@ class DashboardController extends Controller
         // 7. Alerts, Markers, dan Recent Documents (Tetap ditampilkan tanpa filter bulan ini agar data penting tidak terlewat)
 
         // 7. Alerts Logic (Kegiatan Belum Close & SITAC Expiring)
-        $now = Carbon::now();
-        $startOfCurrentMonth = $now->startOfMonth()->format('Y-m-d');
+        // Batas "Jangka Waktu Sebulan": Ambil tanggal 1 di bulan berjalan sebagai batas tunggakan.
+        $startOfCurrentMonth = Carbon::now()->startOfMonth()->format('Y-m-d');
 
-        // Alert Kegiatan: Status Open dan Tanggal Mulai < Awal Bulan Ini (Tunggakan)
-        $alertKegiatan = Activity::where('status', 'Open')
-            ->whereDate('tanggal_mulai', '<', $startOfCurrentMonth)
-            ->get();
+        // Alert Kegiatan: Status Open dan Tanggal Mulai < Awal Bulan Sekarang (Berarti berasal dari bulan sebelumnya)
+        $alertKegiatanQuery = Activity::where('status', 'Open')
+            ->whereDate('tanggal_mulai', '<', $startOfCurrentMonth);
+
+        // Jika dashboard unit menyertakan param 'unit', filter alert hanya untuk unit tersebut
+        if ($request->filled('unit') && $request->unit !== 'ALL') {
+            $alertKegiatanQuery->where('unit', strtolower($request->unit));
+        }
+        $alertKegiatan = $alertKegiatanQuery->get();
 
         $threeMonthsFromNow = Carbon::now()->addMonths(3)->format('Y-m-d');
-        $alertSitac = LaporanSitac::where('status', 'Open')
+        $alertSitacQuery = LaporanSitac::where('status', 'Open')
             ->whereNotNull('tanggal_berakhir')
-            ->whereDate('tanggal_berakhir', '<=', $threeMonthsFromNow)->get();
+            ->whereDate('tanggal_berakhir', '<=', $threeMonthsFromNow);
+
+        // Alert SITAC hanya relevan untuk unit HAI
+        if ($request->filled('unit') && $request->unit !== 'ALL' && strtoupper($request->unit) !== 'HAI') {
+            $alertSitac = collect();
+        } else {
+            $alertSitac = $alertSitacQuery->get();
+        }
 
         // Alert OLT: Perangkat dengan status baterai 'Bad'
         $queryOlt = OltDevice::where('status_baterai', 'Bad');
 
-        // Filter berdasarkan bulan/tahun jika relevan (menggunakan updated_at sebagai indikator kapan status menjadi Bad)
-        $queryOlt->whereMonth('updated_at', $currentMonth)
-                 ->whereYear('updated_at', $currentYear);
+        // Alert OLT hanya relevan untuk unit ISP
+        if ($request->filled('unit') && $request->unit !== 'ALL' && strtoupper($request->unit) !== 'ISP') {
+            $alertOlt = collect();
+        } else {
+            $alertOlt = $queryOlt->get()->map(fn($item) => [
+                'id'             => $item->id,
+                'nama_olt'       => $item->nama_perangkat,
+                'lokasi'         => $item->lokasi,
+                'battery_status' => $item->status_baterai,
+                'status'         => 'URGENT',
+            ]);
+        }
 
-        $alertOlt = $queryOlt->get()->map(fn($item) => [
-            'id'             => $item->id,
-            'nama_olt'       => $item->nama_perangkat,
-            'lokasi'         => $item->lokasi,
-            'battery_status' => $item->status_baterai,
-            'status'         => 'URGENT',
-        ]);
-
-        $sitacMarkers = LaporanSitac::select('id', 'nama_vendor', 'lokasi', 'latitude', 'longitude')->get();
-        $p3Markers = ThirdParty::select('id', 'nama_vendor', 'lokasi', 'latitude', 'longitude',)->get();
-        // Ambil data koordinat OLT
-        $oltMarkers = OltDevice::select('id', 'nama_perangkat', 'lokasi', 'latitude', 'longitude', 'status_baterai')->get(); //
+        // Markers Logic - Sesuaikan markers dengan unit yang merequest
+        $targetUnit = $request->filled('unit') ? strtoupper($request->unit) : 'ALL';
+        $sitacMarkers = ($targetUnit === 'ALL' || $targetUnit === 'HAI') 
+            ? LaporanSitac::select('id', 'nama_vendor', 'lokasi', 'latitude', 'longitude')->get() 
+            : collect();
+        
+        $p3Markers = ($targetUnit === 'ALL' || $targetUnit === 'OSP') 
+            ? ThirdParty::select('id', 'nama_vendor', 'lokasi', 'latitude', 'longitude')->get() 
+            : collect();
+            
+        $oltMarkers = ($targetUnit === 'ALL' || $targetUnit === 'ISP') 
+            ? OltDevice::select('id', 'nama_perangkat', 'lokasi', 'latitude', 'longitude', 'status_baterai')->get() 
+            : collect();
 
         $docs = collect();
-        $docs = $docs->concat(LaporanSitac::whereNotNull('dokumen')->latest()->take(5)->get()->map(fn($i) => ['name' => $i->nama_vendor, 'file' => asset('storage/' . $i->dokumen)]));
-        $docs = $docs->concat(ThirdParty::whereNotNull('dokumen')->latest()->take(5)->get()->map(fn($i) => ['name' => $i->nama_vendor, 'file' => asset('storage/' . $i->dokumen)]));
+        if ($targetUnit === 'ALL' || $targetUnit === 'HAI') {
+            $docs = $docs->concat(LaporanSitac::whereNotNull('dokumen')->latest()->take(5)->get()->map(fn($i) => ['name' => $i->nama_vendor, 'file' => asset('storage/' . $i->dokumen)]));
+        }
+        if ($targetUnit === 'ALL' || $targetUnit === 'OSP') {
+            $docs = $docs->concat(ThirdParty::whereNotNull('dokumen')->latest()->take(5)->get()->map(fn($i) => ['name' => $i->nama_vendor, 'file' => asset('storage/' . $i->dokumen)]));
+        }
+
+        // Filter Histori Inventory berdasarkan Unit
+        $inventoryHistoryQuery = InventoryHistory::latest();
+        if ($request->filled('unit') && $request->unit !== 'ALL') {
+            $inventoryHistoryQuery->where('unit', $request->unit);
+        }
+        $inventoryHistory = $inventoryHistoryQuery->take(5)->get();
 
         // 8. Kirim Respon JSON
         return response()->json([
@@ -177,6 +211,7 @@ class DashboardController extends Controller
                 ],
                 'recentDocs'     => $docs->sortByDesc('created_at')->take(10),
                 'inventoryCount' => Inventory::count(),
+                'inventoryHistory' => $inventoryHistory,
             ],
         ]);
     }

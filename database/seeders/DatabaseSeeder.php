@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-       User::factory()->create([
+        User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
             'username' => 'admin_test', // Tambahkan ini agar tidak error
@@ -25,6 +25,9 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // DAN PASTIKAN UserSeeder yang kita buat kemarin dipanggil di bawahnya:
-        $this->call(UserSeeder::class);
+        $this->call([
+            // UserSeeder::class,
+            ActivitySeeder::class,
+        ]);
     }
 }

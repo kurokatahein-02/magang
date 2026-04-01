@@ -98,10 +98,15 @@ class InventoryController extends Controller
         ]);
     }
 
-    public function history()
+    public function history(Request $request)
     {
-        $history = InventoryHistory::latest()->get();
-        return response()->json(['success' => true, 'data' => $history]);
+        $query = InventoryHistory::query();
+
+        if ($request->filled('unit') && $request->unit !== 'ALL') {
+            $query->where('unit', $request->unit);
+        }
+
+        return response()->json(['success' => true, 'data' => $query->latest()->get()]);
     }
 
     public function export(Request $request)

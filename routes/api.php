@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\OltDeviceController;
 use App\Http\Controllers\Api\ThirdPartyController;
 use App\Http\Controllers\Api\LaporanSitacController;
+use App\Http\Controllers\Api\PotensiDataController;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,6 +58,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // OLT Devices
     Route::patch('/olt-devices/{id}/status-battery', [OltDeviceController::class, 'updateBatteryStatus']);
     Route::apiResource('olt-devices', OltDeviceController::class);
+
+    // Potensi Data
+    Route::apiResource('potensi-data', PotensiDataController::class);
 
     // User Management (Biasanya hanya Superadmin, tapi masuk ke grup proteksi dulu)
     Route::apiResource('users', UserController::class);
