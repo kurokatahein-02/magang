@@ -5,10 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\PotensiData;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\PotensiDataExport;
 
 class PotensiDataController extends Controller {
     public function index() {
         return response()->json(PotensiData::all());
+    }
+
+    public function export(Request $request) {
+        $fileName = 'Data_Potensi_Alpro_' . now()->format('Ymd_His') . '.xlsx';
+        return Excel::download(new PotensiDataExport(), $fileName);
     }
 
     public function store(Request $request) {

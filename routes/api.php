@@ -60,6 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('olt-devices', OltDeviceController::class);
 
     // Potensi Data
+    Route::get('/potensi-data/export', [PotensiDataController::class, 'export']);
     Route::apiResource('potensi-data', PotensiDataController::class);
 
     // User Management (Biasanya hanya Superadmin, tapi masuk ke grup proteksi dulu)
