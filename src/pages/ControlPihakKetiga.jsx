@@ -226,6 +226,16 @@ const ControlPihakKetiga = () => {
       });
     }
 
+    // 3. Validasi Ukuran File (Maksimal 5MB)
+    if (selectedFile && selectedFile.size > 5 * 1024 * 1024) {
+      return Swal.fire({
+        icon: "error",
+        title: "File Terlalu Besar",
+        text: "Ukuran file yang Anda pilih melebihi batas 5MB. Silakan unggah file yang lebih kecil.",
+        confirmButtonColor: "#386097",
+      });
+    }
+
     // 3. Gunakan FormData karena ada pengiriman file (Multipart)
     const data = new FormData();
     data.append("nama_vendor", formData.name);
@@ -497,7 +507,21 @@ const ControlPihakKetiga = () => {
               <input
                 type="file"
                 ref={fileInputRef}
-                onChange={(e) => setSelectedFile(e.target.files[0])}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file && file.size > 5 * 1024 * 1024) {
+                    Swal.fire({
+                      icon: "error",
+                      title: "File Terlalu Besar",
+                      text: "Ukuran file maksimal adalah 5MB.",
+                      confirmButtonColor: "#386097",
+                    });
+                    e.target.value = ""; // Reset input file agar tidak menyimpan file yang salah
+                    setSelectedFile(null);
+                  } else {
+                    setSelectedFile(file);
+                  }
+                }}
                 className="hidden"
                 accept=".pdf"
               />
@@ -647,7 +671,7 @@ const ControlPihakKetiga = () => {
             >
               <div className="overflow-hidden rounded-t-[20px] border-x border-t border-black bg-white shadow-xl">
                 <table className="w-full text-center border-collapse table-fixed">
-                  <thead className="bg-[#386097]">
+                  <thead className="bg-[#386097] sticky top-0 z-10">
                     <tr className="text-[11px] font-bold">
                       <th className="w-12 p-3 border-r border-b text-white text-[11px] font-bold">
                         NO

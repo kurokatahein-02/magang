@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
-import { Plus, Pencil, Trash2, X, Loader2, ChevronDown } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Loader2, ChevronDown, Download } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 const PotensiData = () => {
@@ -144,6 +144,34 @@ const PotensiData = () => {
     }
   };
 
+  const handleExportExcel = async () => {
+    try {
+      const response = await api.get('/potensi-data/export', {
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+
+      const today = new Date();
+      const formattedDate = today.toISOString().split('T')[0];
+      const fileName = `Data_Potensi_Alpro_${formattedDate}.xlsx`;
+      
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      Swal.fire({ icon: "success", title: "Berhasil", text: "Data berhasil diunduh.", timer: 1500, showConfirmButton: false });
+    } catch (error) {
+      console.error("Gagal mendownload excel:", error);
+      Swal.fire("Error", "Gagal mengunduh laporan.", "error");
+    }
+  };
+
   return (
     <div className="h-full flex flex-col gap-4 select-none">
       {!showForm ? (
@@ -157,7 +185,14 @@ const PotensiData = () => {
 
           {/* Baris Aksi */}
           {!isReadOnly && (
-            <div className="flex justify-end mb-4">
+            <div className="flex justify-end mb-4 gap-3">
+              <button
+                onClick={handleExportExcel}
+                className="bg-[#51A0D2] text-white border border-black rounded-full px-6 py-2 flex items-center gap-2 font-bold text-[10px] shadow-sm hover:bg-black transition-all"
+              >
+                <Download size={14} /> DOWNLOAD EXCEL
+              </button>
+
               <button
                 onClick={() => handleOpenModal()}
                 className="bg-[#386097] border border-black text-white rounded-full px-6 py-2 flex items-center gap-2 font-bold text-[10px] shadow-sm active:scale-95 transition-all hover:bg-white hover:text-black"
@@ -175,17 +210,19 @@ const PotensiData = () => {
                   <th className="w-12 p-3 border-r border-b border-black text-[11px] font-bold">NO</th>
                   <th className="p-3 border-r border-b border-black text-[11px] font-bold">NAMA ALPRO</th>
                   <th className="p-3 border-r border-b border-black text-[11px] font-bold">LOKASI</th>
-                  <th className="p-3 border-r border-b border-black text-[11px] font-bold">THN BUAT/OPS</th>
-                  <th className="w-20 p-3 border-r border-b border-black text-[11px] font-bold text-center">JUMLAH</th>
-                  <th className="p-3 border-r border-b border-black text-[11px] font-bold">KAPASITAS (Terpakai/Total)</th>
-                  <th className="w-24 p-3 border-r border-b border-black text-[11px] font-bold">STATUS</th>
-                  <th className="w-48 p-3 border-b border-black text-[11px] font-bold">OPSI</th>
+                  <th className="w-24 p-3 border-r border-b border-black text-[11px] font-bold">THN BUAT</th>
+                  <th className="w-24 p-3 border-r border-b border-black text-[11px] font-bold">THN OPS</th>
+                  <th className="w-16 p-3 border-r border-b border-black text-[11px] font-bold text-center">JML</th>
+                  <th className="w-20 p-3 border-r border-b border-black text-[11px] font-bold">KAP. TOTAL</th>
+                  <th className="w-20 p-3 border-r border-b border-black text-[11px] font-bold">KAP. PAKAI</th>
+                  <th className="w-20 p-3 border-r border-b border-black text-[11px] font-bold">STATUS</th>
+                  <th className="w-32 p-3 border-b border-black text-[11px] font-bold">OPSI</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="8" className="p-8 text-center">
+                    <td colSpan="10" className="p-8 text-center">
                       <div className="flex justify-center items-center gap-2 font-bold text-xs">
                         <Loader2 className="animate-spin" size={16} /> MEMUAT DATA...
                       </div>
@@ -198,13 +235,11 @@ const PotensiData = () => {
                         <td className="border-r border-black font-bold text-xs">{index + 1}</td>
                         <td className="border-r border-black text-xs px-2 text-left uppercase font-medium">{item.nama_alpro}</td>
                         <td className="border-r border-black text-xs px-2 text-left">{item.lokasi}</td>
-                        <td className="border-r border-black text-xs">
-                          {item.tahun_pembuatan} / {item.tahun_operasi}
-                        </td>
+                        <td className="border-r border-black text-xs">{item.tahun_pembuatan}</td>
+                        <td className="border-r border-black text-xs">{item.tahun_operasi}</td>
                         <td className="border-r border-black text-xs font-bold text-center">{item.jumlah}</td>
-                        <td className="border-r border-black text-xs">
-                          {item.kapasitas_terpakai} / {item.kapasitas_total}
-                        </td>
+                        <td className="border-r border-black text-xs">{item.kapasitas_total}</td>
+                        <td className="border-r border-black text-xs">{item.kapasitas_terpakai}</td>
                         <td className="border-r border-black p-2">
                           <button
                             onClick={() => toggleStatus(item)}
@@ -217,16 +252,16 @@ const PotensiData = () => {
                         </td>
                         <td className="px-4">
                           {!isReadOnly ? (
-                            <div className="flex justify-center gap-4 items-center">
+                            <div className="flex justify-center gap-2 items-center">
                               <button
                                 onClick={() => handleOpenModal(item)}
-                                className="bg-[#386097] border border-black text-white rounded-md px-4 py-0.5 text-[9px] font-bold transition-all hover:bg-white hover:text-black"
+                                className="bg-[#386097] border border-black text-white rounded-md px-3 py-0.5 text-[8px] font-bold transition-all hover:bg-white hover:text-black"
                               >
                                 EDIT
                               </button>
                               <button
                                 onClick={() => handleDelete(item.id)}
-                                className="bg-[#386097] border border-black text-white rounded-md px-4 py-0.5 text-[9px] font-bold transition-all hover:bg-white hover:text-black"
+                                className="bg-[#386097] border border-black text-white rounded-md px-3 py-0.5 text-[8px] font-bold transition-all hover:bg-white hover:text-black"
                               >
                                 DELETE
                               </button>
@@ -241,6 +276,8 @@ const PotensiData = () => {
                     ))}
                     {[...Array(Math.max(0, 10 - data.length))].map((_, i) => (
                       <tr key={`empty-${i}`} className="h-12 border-b border-black">
+                        <td className="border-r border-black"></td>
+                        <td className="border-r border-black"></td>
                         <td className="border-r border-black"></td>
                         <td className="border-r border-black"></td>
                         <td className="border-r border-black"></td>

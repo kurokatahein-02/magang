@@ -437,10 +437,10 @@ const ControlKegiatanHAI = () => {
 
       <div
         onClick={() => !isExpanded && setIsExpanded(true)}
-        className={`overflow-hidden rounded-[20px] border border-black bg-white shadow-xl transition-all ${!isExpanded ? "cursor-pointer hover:scale-[1.002]" : ""}`}
+        className={`rounded-[20px] border border-black bg-white shadow-xl transition-all ${!isExpanded ? "overflow-hidden cursor-pointer hover:scale-[1.002]" : "flex-1 overflow-auto"}`}
       >
         <table className="w-full text-center border-collapse table-fixed">
-          <thead className="bg-[#386097] text-black">
+          <thead className="bg-[#386097] text-black sticky top-0 z-10">
             <tr>
               <th className="w-12 p-3 border-r border-b text-white text-[11px] font-bold">
                 NO

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   MapPin,
   ChevronDown,
-  Download,
   Plus,
   Trash2,
   Edit,
@@ -100,10 +99,6 @@ const MiniOlt = () => {
   useEffect(() => {
     fetchDevices();
   }, []);
-
-  const handleExportExcel = () => {
-    window.open(`${API_URL}/export`, "_blank");
-  };
 
   const startEdit = (item, e) => {
     e.stopPropagation();
@@ -477,12 +472,6 @@ const MiniOlt = () => {
 
         {!expandedView && (
           <div className="flex items-center gap-4">
-            <button
-              onClick={handleExportExcel}
-              className="bg-[#51A0D2] text-white border border-black rounded-full px-6 py-2 flex items-center gap-2 font-bold text-xs shadow-sm hover:bg-black transition-all"
-            >
-              <Download size={18} /> Download Excel
-            </button>
             {!isReadOnly && (
               <button
                 onClick={() => setView("form")}
@@ -501,7 +490,7 @@ const MiniOlt = () => {
           >
             <div className="overflow-hidden rounded-t-[20px] border-x border-t border-black bg-white shadow-xl">
               <table className="w-full text-center border-collapse table-fixed">
-                <thead className="bg-[#386097]">
+                <thead className="bg-[#386097] sticky top-0 z-10">
                   <tr className="text-[11px] font-bold">
                     <th className="w-12 p-3 border-r border-b text-white">
                       NO
